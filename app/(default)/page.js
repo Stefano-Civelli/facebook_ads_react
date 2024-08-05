@@ -110,7 +110,6 @@ export default function Home() {
           width: "80vw",
           maxWidth: "1000px",
           margin: "0 auto",
-          border: "1px solid red",
         }}
       >
         <canvas className="bg-white" ref={chartRef}></canvas>
