@@ -3,7 +3,7 @@ import Image from "next/image";
 
 const Footer = () => {
   return (
-    <footer className="footer footer-center uq-color text-primary-content p-10">
+    <footer className="footer footer-center uq-color text-primary-content p-10 relative z-10">
       <aside>
         <Image
           src="/uq-logo-white.svg"

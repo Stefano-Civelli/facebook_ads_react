@@ -3,116 +3,101 @@
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-//import Plot from "react-plotly.js";
+import Sidebar from "@/components/Sidebar";
 import { useEffect, useState, useRef } from "react";
 import { Chart } from "chart.js/auto";
 import dynamic from "next/dynamic";
-const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
+import BarChart from "@/components/charts/BarChart";
+import { Bar } from "react-chartjs-2";
 
 export default function Home() {
-  const [data, setData] = useState({ parties: [], spend: [] });
-  const chartRef = useRef(null);
-  const chartInstance = useRef(null);
+  const [data, setData] = useState({
+    data: [],
+    description: "",
+    title: "",
+    x_label: "",
+    y_label: "",
+  });
 
-  const barChartData = {
-    /* Your bar chart data */
-  };
   const barChartOptions = {
-    /* Your bar chart options */
+    titleText: "Spend by Party",
+    xText: "Spend (Millions $)",
+    yText: "Parties",
   };
 
-  const lineChartData = {
-    /* Your line chart data */
+  const options = {
+    indexAxis: "y",
+    plugins: {
+      title: {
+        display: true,
+        text: data.title,
+      },
+      legend: {
+        display: false,
+      },
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: data.x_label,
+        },
+        ticks: {
+          callback: function (value) {
+            return "$" + value.toFixed(0) + "M";
+          },
+          color: "black",
+        },
+        grid: {
+          color: "lightgray",
+        },
+      },
+      y: {
+        title: {
+          display: true,
+          text: data.y_label,
+        },
+        ticks: {
+          color: "black",
+        },
+      },
+    },
   };
-  const lineChartOptions = {
-    /* Your line chart options */
+
+  const fetchData = async () => {
+    const response = await fetch("http://127.0.0.1:5000/api/party-spend");
+    const json = await response.json();
+    setData(json);
+    console.log(json);
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const response = await fetch("http://127.0.0.1:5000/api/party-spend");
-      const json = await response.json();
-      setData(json);
-    };
     fetchData();
   }, []);
 
-  useEffect(() => {
-    if (data.parties.length > 0 && chartRef.current) {
-      if (chartInstance.current) {
-        chartInstance.current.destroy();
-      }
-
-      const ctx = chartRef.current.getContext("2d");
-      chartInstance.current = new Chart(ctx, {
-        type: "bar",
-        data: {
-          labels: data.parties,
-          datasets: [
-            {
-              label: "Spend (Millions $)",
-              data: data.spend.map((s) => s / 1e6),
-              backgroundColor: "lightblue",
-            },
-          ],
-        },
-        options: {
-          indexAxis: "y",
-          plugins: {
-            title: {
-              display: true,
-              text: "Spend by Party",
-            },
-            legend: {
-              display: false,
-            },
-          },
-          scales: {
-            x: {
-              title: {
-                display: true,
-                text: "Spend (Millions $)",
-              },
-              ticks: {
-                callback: function (value) {
-                  return "$" + value.toFixed(0) + "M";
-                },
-                color: "black",
-              },
-              grid: {
-                color: "lightgray",
-              },
-            },
-            y: {
-              title: {
-                display: true,
-                text: "Parties",
-              },
-              ticks: {
-                color: "black",
-              },
-            },
-          },
-        },
-      });
-    }
-  }, [data]);
-
   return (
-    <div>
-      <Head>
-        <title>Main Page</title>
-      </Head>
-      <div
-        style={{
-          position: "relative",
-          height: "60vh",
-          width: "80vw",
-          maxWidth: "1000px",
-          margin: "0 auto",
-        }}
-      >
-        <canvas className="bg-white" ref={chartRef}></canvas>
+    <div className="container grid grid-cols-1 md:grid-cols-4 gap-5">
+      <div className="md:col-span-1">
+        <Sidebar />
+      </div>
+      <div className="md:col-span-3 space-y-4">
+        <h1 className="text-center">Plots</h1>
+        <BarChart data={data} options={barChartOptions} />
+        <BarChart data={data} options={barChartOptions} />
+        <BarChart data={data} options={barChartOptions} />
+        <Bar
+          data={{
+            labels: data.data.map((x) => x.label),
+            datasets: [
+              {
+                label: data.xLabel,
+                data: data.data.map((x) => x.value / 1e6),
+                backgroundColor: "lightblue",
+              },
+            ],
+          }}
+          options={options}
+        />
       </div>
     </div>
   );

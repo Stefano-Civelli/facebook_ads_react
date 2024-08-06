@@ -14,9 +14,23 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+        <meta
+          name="viewport"
+          content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
+        />
+      </head>
       <body className={inter.className}>
         <Navbar />
+
+        <div className="wrapper">
+          <div className="gradient gradient-1"></div>
+          <div className="gradient gradient-2"></div>
+          <div className="gradient gradient-3"></div>
+        </div>
+
         <div className="main-content">{children}</div>
+
         <Footer />
       </body>
     </html>
