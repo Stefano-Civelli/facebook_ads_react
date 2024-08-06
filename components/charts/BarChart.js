@@ -54,7 +54,7 @@ const BarChart = ({ data, options }) => {
             y: {
               title: {
                 display: true,
-                text: data,
+                text: data.y_label,
               },
               ticks: {
                 color: "black",
