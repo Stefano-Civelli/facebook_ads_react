@@ -20,7 +20,6 @@ const BarChart = ({ data, options }) => {
             {
               label: data.xLabel,
               data: data.data.map((x) => x.value / 1e6),
-              backgroundColor: "lightblue",
             },
           ],
         },

@@ -22,7 +22,7 @@ div {
   .text-balance {
     text-wrap: balance;
   }
-  .border {
+  .debug {
     border: 1px solid red;
   }
 }
@@ -308,7 +308,7 @@ div {
   body {
     margin: 0;
     color: #fff;
-    background-color: #131313bb;
+    background-color: #020617;
     padding: 0;
     
   }

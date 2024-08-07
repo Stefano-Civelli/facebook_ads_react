@@ -23,11 +23,11 @@ export default function RootLayout({ children }) {
       <body className={inter.className}>
         <Navbar />
 
-        <div className="wrapper">
+        {/* <div className="wrapper">
           <div className="gradient gradient-1"></div>
           <div className="gradient gradient-2"></div>
           <div className="gradient gradient-3"></div>
-        </div>
+        </div> */}
 
         <div className="main-content">{children}</div>
 
