@@ -11,6 +11,10 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
+import useSWR from "swr";
+
+const fetcher = (...args) => fetch(...args).then((res) => res.json());
+
 const salesData = [
   {
     name: "Jan",
@@ -45,23 +49,44 @@ const salesData = [
 ];
 
 const LineChartComponent = () => {
+  const { data, error, isLoading } = useSWR(
+    "http://127.0.0.1:5000/api/time-series",
+    fetcher
+  );
+
+  if (error) return <div>failed to load</div>;
+  if (isLoading)
+    return (
+      <div className="h-[300px] flex items-center">
+        <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    );
+
+  console.log(data);
+
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer
+      width="100%"
+      height="100%"
+      className="flex flex-col items-center justify-center"
+    >
+      <h3 className="text-lg font-semibold text-white mt-5">{data.title}</h3>
       <LineChart
-        width={500}
-        height={300}
-        data={salesData}
+        data={data.data}
         margin={{
           right: 30,
+          left: 20,
+          top: 5,
+          bottom: 15,
         }}
       >
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
+        <XAxis dataKey="date" />
         <YAxis />
         <Tooltip content={<CustomTooltip />} />
         <Legend />
-        <Line type="monotone" dataKey="revenue" stroke="#3b82f6" />
-        <Line type="monotone" dataKey="profit" stroke="#8b5cf6" />
+        <Line type="monotone" dataKey="df1_mean_spend" stroke="#3b82f6" />
+        {/* <Line type="monotone" dataKey="profit" stroke="#8b5cf6" /> */}
       </LineChart>
     </ResponsiveContainer>
   );
@@ -75,13 +100,15 @@ const CustomTooltip = ({ active, payload, label }) => {
       <div className="p-4 bg-slate-900 flex flex-col gap-4 rounded-md">
         <p className="text-medium text-lg">{label}</p>
         <p className="text-sm text-blue-400">
-          Revenue:
-          <span className="ml-2">${payload[0].value}</span>
+          Spend:
+          <span className="ml-2">
+            ${`${(payload[0].value / 1000).toFixed(1)}K`}
+          </span>
         </p>
-        <p className="text-sm text-indigo-400">
+        {/* <p className="text-sm text-indigo-400">
           Profit:
           <span className="ml-2">${payload[1].value}</span>
-        </p>
+        </p> */}
       </div>
     );
   }

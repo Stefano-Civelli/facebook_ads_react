@@ -11,36 +11,49 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const salesData = [
-  {
-    label: "Greens",
-    value: 625326.5,
-  },
-  {
-    label: "Independents",
-    value: 925665,
-  },
-  {
-    label: "Liberal",
-    value: 3965220,
-  },
-  {
-    label: "Labor",
-    value: 5124779,
-  },
-];
+import useSWR from "swr";
+
+// async function getData() {
+//   const res = await fetch("http://127.0.0.1:5000/api/party-spend", {
+//     cache: "force-cache", //it's the default
+//   });
+//   if (!res.ok) {
+//     throw new Error("Failed to fetch data");
+//   }
+//   return res.json();
+// }
+
+const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 const BarChartComponent = () => {
+  const { data, error, isLoading } = useSWR(
+    "http://127.0.0.1:5000/api/party-spend",
+    fetcher
+  );
+
+  if (error) return <div>failed to load</div>;
+  if (isLoading)
+    return (
+      <div className="h-[300px] flex items-center">
+        <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    );
+
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer
+      width="100%"
+      height="100%"
+      className="flex flex-col items-center justify-center"
+    >
+      <h3 className="text-lg font-semibold text-white mt-5">{data.title}</h3>
       <BarChart
-        data={salesData}
+        data={data.data}
         layout="vertical"
         margin={{
           right: 30,
           left: 50,
-          top: 10,
-          bottom: 10,
+          top: 5,
+          bottom: 15,
         }}
       >
         <CartesianGrid strokeDasharray="3" />
@@ -69,7 +82,9 @@ const CustomTooltip = ({ active, payload, label }) => {
         <p className="text-medium text-lg">{label}</p>
         <p className="text-sm text-blue-400">
           spend:
-          <span className="ml-2">${payload[0].value}</span>
+          <span className="ml-2">
+            ${`${(payload[0].value / 1000000).toFixed(1)}M`}
+          </span>
         </p>
       </div>
     );
