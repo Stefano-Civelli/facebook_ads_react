@@ -1,7 +1,12 @@
-import DateSliderComp from "./DateSliderComp";
+"use client";
+
+import DateSelector from "./DateSelectorComp";
 import Selectors from "./Selectors";
+import { useDateContext } from "../context/DateContext";
 
 const Sidebar = () => {
+  const { startDate, endDate, setStartDate, setEndDate } = useDateContext();
+
   return (
     <div className=" w-full sticky top-12 md:h-screen p-5 overflow-y-auto border border-slate-900 bg-slate-900/50">
       <h2>Select Options</h2>
@@ -26,7 +31,12 @@ const Sidebar = () => {
         <span className="label-text ml-4">Indipendents Party</span>
       </label>
 
-      <DateSliderComp />
+      <DateSelector
+        startDate={startDate}
+        endDate={endDate}
+        onStartDateChange={setStartDate}
+        onEndDateChange={setEndDate}
+      />
     </div>
   );
 };

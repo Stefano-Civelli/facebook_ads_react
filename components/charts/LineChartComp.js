@@ -12,6 +12,7 @@ import {
 } from "recharts";
 
 import useSWR from "swr";
+import { useDateContext } from "../../context/DateContext";
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
@@ -49,10 +50,16 @@ const salesData = [
 ];
 
 const LineChartComponent = () => {
+  const { startDate, endDate } = useDateContext();
   const { data, error, isLoading } = useSWR(
-    "http://127.0.0.1:5000/api/time-series",
+    `http://127.0.0.1:5000/api/time-series?startDate=${startDate}&endDate=${endDate}`,
     fetcher
   );
+  // const { data, error, isLoading } = useSWR(
+  //127.0.0.1:5000/api/time-series?startDate=${startDate}&endDate=${endDate}
+  //   "",
+  //   fetcher
+  // );
 
   if (error) return <div>failed to load</div>;
   if (isLoading)
