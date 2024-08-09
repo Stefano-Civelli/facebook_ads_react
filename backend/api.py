@@ -88,6 +88,12 @@ print('Server ready')
 # ---------------------------- API ---------------------------- #
 @app.route('/api/party-spend')
 def get_party_spend():
+    start_date_str = request.args.get('startDate')
+    end_date_str = request.args.get('endDate')
+
+    start_date, end_date, error_response, status_code = get_and_validate_dates(start_date_str, end_date_str)
+    if error_response:
+        return jsonify(error_response), status_code
     data = {
         'title': 'Party Spend',
         'description': 'Total spend by each party',
@@ -100,6 +106,12 @@ def get_party_spend():
 
 @app.route('/api/spend-by-term-and-party')
 def get_spend_by_term_and_party():
+    start_date_str = request.args.get('startDate')
+    end_date_str = request.args.get('endDate')
+
+    start_date, end_date, error_response, status_code = get_and_validate_dates(start_date_str, end_date_str)
+    if error_response:
+        return jsonify(error_response), status_code
     data = {
         'title': 'Spend by Term and Party',
         'description': 'Total spend by each party and term',
@@ -111,6 +123,12 @@ def get_spend_by_term_and_party():
 
 @app.route('/api/spend-by-electorate-and-party')
 def get_spend_by_electorate_and_party():
+    start_date_str = request.args.get('startDate')
+    end_date_str = request.args.get('endDate')
+
+    start_date, end_date, error_response, status_code = get_and_validate_dates(start_date_str, end_date_str)
+    if error_response:
+        return jsonify(error_response), status_code
     data = {
         'title': 'Spend by Electorate and Party',
         'description': 'Total spend by each party and electorate',
@@ -122,6 +140,12 @@ def get_spend_by_electorate_and_party():
 
 @app.route('/api/top-funding-entities')
 def get_top_funding_entities():
+    start_date_str = request.args.get('startDate')
+    end_date_str = request.args.get('endDate')
+
+    start_date, end_date, error_response, status_code = get_and_validate_dates(start_date_str, end_date_str)
+    if error_response:
+        return jsonify(error_response), status_code
     data = {
         'title': 'Top Funding Entities',
         'description': 'Top funding entities',
@@ -138,20 +162,8 @@ def get_time_series():
     end_date_str = request.args.get('endDate')
 
     start_date, end_date, error_response, status_code = get_and_validate_dates(start_date_str, end_date_str)
-
     if error_response:
         return jsonify(error_response), status_code
-    
-    if not start_date_str or not end_date_str:
-        # Set default values using start_date and end_date
-        start_date_str = start_date.strftime("%Y-%m-%d")
-        end_date_str = end_date.strftime("%Y-%m-%d")
-    
-    try:
-        start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
-        end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
-    except ValueError:
-        return jsonify({"error": "Invalid date format. Use YYYY-MM-DD"}), 400
     
     # Filter the data based on start_date and end_date
     filtered_data = [
@@ -168,6 +180,7 @@ def get_time_series():
     }
     
     return jsonify(response_data)
+
 
 # ---------------------------- API ---------------------------- #
 

@@ -13,41 +13,43 @@ import {
 
 import useSWR from "swr";
 import { useDateContext } from "../../context/DateContext";
+import { chartColors } from "@/lib/config.js";
+import { formatDate, formatNumber } from "@/lib/util.js";
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
-const salesData = [
-  {
-    name: "Jan",
-    revenue: 4000,
-    profit: 2400,
-  },
-  {
-    name: "Feb",
-    revenue: 3000,
-    profit: 1398,
-  },
-  {
-    name: "Mar",
-    revenue: 9800,
-    profit: 2000,
-  },
-  {
-    name: "Apr",
-    revenue: 3908,
-    profit: 2780,
-  },
-  {
-    name: "May",
-    revenue: 4800,
-    profit: 1890,
-  },
-  {
-    name: "Jun",
-    revenue: 3800,
-    profit: 2390,
-  },
-];
+// const salesData = [
+//   {
+//     name: "Jan",
+//     revenue: 4000,
+//     profit: 2400,
+//   },
+//   {
+//     name: "Feb",
+//     revenue: 3000,
+//     profit: 1398,
+//   },
+//   {
+//     name: "Mar",
+//     revenue: 9800,
+//     profit: 2000,
+//   },
+//   {
+//     name: "Apr",
+//     revenue: 3908,
+//     profit: 2780,
+//   },
+//   {
+//     name: "May",
+//     revenue: 4800,
+//     profit: 1890,
+//   },
+//   {
+//     name: "Jun",
+//     revenue: 3800,
+//     profit: 2390,
+//   },
+// ];
 
 const LineChartComponent = () => {
   const { startDate, endDate } = useDateContext();
@@ -55,11 +57,6 @@ const LineChartComponent = () => {
     `http://127.0.0.1:5000/api/time-series?startDate=${startDate}&endDate=${endDate}`,
     fetcher
   );
-  // const { data, error, isLoading } = useSWR(
-  //127.0.0.1:5000/api/time-series?startDate=${startDate}&endDate=${endDate}
-  //   "",
-  //   fetcher
-  // );
 
   if (error) return <div>failed to load</div>;
   if (isLoading)
@@ -82,18 +79,27 @@ const LineChartComponent = () => {
         data={data.data}
         margin={{
           right: 30,
-          left: 20,
+          left: 0,
           top: 5,
           bottom: 15,
         }}
       >
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="date" />
-        <YAxis />
+        <XAxis dataKey="date" tickFormatter={formatDate} />
+        <YAxis tickFormatter={(x) => `${x / 1000000}M`} />
+
         <Tooltip content={<CustomTooltip />} />
         <Legend />
-        <Line type="monotone" dataKey="df1_mean_spend" stroke="#3b82f6" />
-        {/* <Line type="monotone" dataKey="profit" stroke="#8b5cf6" /> */}
+        <Line
+          type="monotone"
+          dataKey="df1_mean_spend"
+          stroke={chartColors.chart_color_1}
+        />
+        <Line
+          type="monotone"
+          dataKey="df1_mean_impressions"
+          stroke={chartColors.chart_color_3}
+        />
       </LineChart>
     </ResponsiveContainer>
   );
@@ -105,17 +111,15 @@ const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
       <div className="p-4 bg-slate-900 flex flex-col gap-4 rounded-md">
-        <p className="text-medium text-lg">{label}</p>
-        <p className="text-sm text-blue-400">
+        <p className="text-medium text-lg">{formatDate(label)}</p>
+        <p className="text-sm" style={{ color: payload[0].stroke }}>
           Spend:
-          <span className="ml-2">
-            ${`${(payload[0].value / 1000).toFixed(1)}K`}
-          </span>
+          <span className="ml-2">${formatNumber(payload[0].value)}</span>
         </p>
-        {/* <p className="text-sm text-indigo-400">
-          Profit:
-          <span className="ml-2">${payload[1].value}</span>
-        </p> */}
+        <p className="text-sm" style={{ color: payload[1].stroke }}>
+          Impressions:
+          <span className="ml-2">{formatNumber(payload[1].value)}</span>
+        </p>
       </div>
     );
   }

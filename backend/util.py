@@ -1,5 +1,5 @@
 import ast
-import datetime
+from datetime import datetime
 import pandas as pd
 
 
@@ -110,10 +110,3 @@ def get_and_validate_dates(start_date_str, end_date_str):
     
     return start_date, end_date, None, 200
 
-def filter_data_by_date(data, start_date, end_date):
-    filtered_data = [
-        entry for entry in data
-        if start_date <= datetime.strptime(entry["date"], "%Y-%m-%d") <= end_date
-    ]
-    
-    return filtered_data

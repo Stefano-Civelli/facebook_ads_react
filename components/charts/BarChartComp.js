@@ -12,6 +12,9 @@ import {
 } from "recharts";
 
 import useSWR from "swr";
+import { useDateContext } from "../../context/DateContext";
+import { chartColors } from "@/lib/config.js";
+import { formatMillions } from "@/lib/util";
 
 // async function getData() {
 //   const res = await fetch("http://127.0.0.1:5000/api/party-spend", {
@@ -26,8 +29,9 @@ import useSWR from "swr";
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 const BarChartComponent = () => {
+  const { startDate, endDate } = useDateContext();
   const { data, error, isLoading } = useSWR(
-    "http://127.0.0.1:5000/api/party-spend",
+    `http://127.0.0.1:5000/api/party-spend?startDate=${startDate}&endDate=${endDate}`,
     fetcher
   );
 
@@ -67,7 +71,7 @@ const BarChartComponent = () => {
           cursor={{ fill: "rgba(240, 255, 255, 0.129)" }}
         />
         <Legend />
-        <Bar dataKey="value" fill="#2563eb" />
+        <Bar dataKey="value" fill={chartColors.chart_color_3} />
       </BarChart>
     </ResponsiveContainer>
   );
@@ -82,9 +86,7 @@ const CustomTooltip = ({ active, payload, label }) => {
         <p className="text-medium text-lg">{label}</p>
         <p className="text-sm text-blue-400">
           spend:
-          <span className="ml-2">
-            ${`${(payload[0].value / 1000000).toFixed(1)}M`}
-          </span>
+          <span className="ml-2">${formatMillions(payload[0].value)}</span>
         </p>
       </div>
     );
