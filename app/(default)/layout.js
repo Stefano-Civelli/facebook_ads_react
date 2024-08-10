@@ -1,10 +1,7 @@
 // This is the layout component that wraps all pages in the app.
-import { Inter } from "next/font/google";
 import "./globals.css";
 import Footer from "@/components/footer";
 import Navbar from "@/components/navbar";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
   title: "Create Next App",
@@ -20,17 +17,9 @@ export default function RootLayout({ children }) {
           content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
         />
       </head>
-      <body className={inter.className}>
+      <body>
         <Navbar />
-
-        {/* <div className="wrapper">
-          <div className="gradient gradient-1"></div>
-          <div className="gradient gradient-2"></div>
-          <div className="gradient gradient-3"></div>
-        </div> */}
-
         <div className="main-content">{children}</div>
-
         <Footer />
       </body>
     </html>

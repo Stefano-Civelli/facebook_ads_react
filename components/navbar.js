@@ -1,10 +1,13 @@
 import Link from "next/link";
 import styles from "@/styles/navbar.module.css";
 import { FaGithub } from "react-icons/fa";
+import { Quicksand } from "next/font/google";
+
+const quicksand = Quicksand({ subsets: ["latin"], weight: "400" });
 
 const Navbar = () => {
   return (
-    <div>
+    <div className={quicksand.className}>
       <div
         className={`${styles.my_navbar} navbar bg-base-100 fixed top-0 min-h-12`}
       >
