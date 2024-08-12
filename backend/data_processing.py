@@ -18,21 +18,35 @@ def read_data(file_path, start_date, end_date):
     df['ad_delivery_start_time'] = pd.to_datetime(df['ad_delivery_start_time'])
     df['ad_delivery_stop_time'] = pd.to_datetime(df['ad_delivery_stop_time'], errors='coerce')  # Coerce errors for NaNs
 
-    #df['tokenized_text'] = df['tokenized_text'].apply(ast.literal_eval)
-    df['demographic_distribution'] = df['demographic_distribution'].apply(safe_eval)
-    df['region_distribution'] = df['region_distribution'].apply(safe_eval)
+    df['tokenized_text'] = df['tokenized_text'].apply(ast.literal_eval)
+    df['demographic_distribution'] = df['demographic_distribution'].apply(ast.literal_eval)
+    df['region_distribution'] = df['region_distribution'].apply(ast.literal_eval)
+    df['sentences'] = df['sentences'].apply(ast.literal_eval)
+    df['sentence_confidence_scores'] = df['sentence_confidence_scores'].apply(ast.literal_eval)
 
 
     # drop rows where ad_delivery_stop_time is missing
     df = df.dropna(subset=['ad_delivery_stop_time'])
     # drop ads where the ad_creative_link_caption is atsijobs.com.au
-    df = df[df['ad_creative_link_caption'] != 'atsijobs.com.au']
+    #df = df[df['ad_creative_link_caption'] != 'atsijobs.com.au']
     # drop ads where the page_name is Indigenous Employment Australia
-    df = df[df['page_name'] != 'Indigenous Employment Australia']
-
+    #df = df[df['page_name'] != 'Indigenous Employment Australia']
 
     df = df[df['ad_delivery_start_time'] >= start_date]
     df = df[df['ad_delivery_stop_time'] <= end_date]
+
+    # drop columns with more than 70% missing values
+    threshold = 0.7
+    df = df.loc[:, df.isnull().mean() < threshold]
+
+    high_persuasive_mask = df['persuasive_ratio'] > 0.8
+
+    low_persuasive_mask = df['persuasive_ratio'] < 0.2
+
+    medium_persuasive_mask = ~(high_persuasive_mask | low_persuasive_mask)
+
+
+
 
     liberal_mask = (df['party'] == 'Liberal') | \
                (df['party'] == 'Liberal Nationals (QLD)') | \
@@ -61,6 +75,9 @@ def read_data(file_path, start_date, end_date):
     other_parties_df = df[other_parties_mask]
     main_parties_df = df[main_parties_mask]
     has_party_df = df[has_a_party_mask]
+    high_persuasive_df = df[high_persuasive_mask]
+    low_persuasive_df = df[low_persuasive_mask]
+    medium_persuasive_df = df[medium_persuasive_mask]
 
     all_dfs = {'liberal_df': liberal_df,
                 'labor_df': labor_df,
@@ -68,7 +85,10 @@ def read_data(file_path, start_date, end_date):
                 'independents_df': independents_df,
                 'main_parties_df': main_parties_df,
                 'other_parties_df': other_parties_df,
-                'has_party_df': has_party_df}
+                'has_party_df': has_party_df,
+                'high_persuasive_df': high_persuasive_df,
+                'low_persuasive_df': low_persuasive_df,
+                'medium_persuasive_df': medium_persuasive_df}
 
     party_dfs = {'liberal_df': liberal_df,
                 'labor_df': labor_df,
@@ -79,7 +99,7 @@ def read_data(file_path, start_date, end_date):
     df['macro_party'] = df.apply(assign_macro_party, axis=1)
 
 
-    return df, party_dfs
+    return df, all_dfs, party_dfs
 
 
 

@@ -110,3 +110,7 @@ def get_and_validate_dates(start_date_str, end_date_str):
     
     return start_date, end_date, None, 200
 
+
+
+def apply_date_interval(df, start_date, end_date):
+    return df[(df['ad_delivery_start_time'] >= start_date) & (df['ad_delivery_stop_time'] <= end_date)]
