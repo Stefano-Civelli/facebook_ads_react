@@ -1,4 +1,3 @@
-import json
 import os
 import sys
 
@@ -21,7 +20,7 @@ CORS(app)
 file_path = 'data/2022_aus_elections_mar_to_may_29_persuasion_party_tokenized.csv'
 
 election_day = pd.Timestamp('2022-05-21')
-default_start_date = pd.Timestamp('2022-03-01')
+default_start_date = pd.Timestamp('2022-02-27')
 default_end_date = pd.Timestamp('2022-06-01')
 
 
@@ -77,7 +76,7 @@ def prepare_data_for_timeseries_api(df1, df2=None):
         data.append(entry)
     return data
 
-time_series_data = prepare_data_for_timeseries_api(all_dfs['high_persuasive_df'], party_dfs['low_persuasive_df'])
+time_series_data = prepare_data_for_timeseries_api(all_dfs['high_persuasive_df'], all_dfs['low_persuasive_df'])
 
 
 print('Server ready')
@@ -87,7 +86,7 @@ def get_party_spend():
     start_date_str = request.args.get('startDate')
     end_date_str = request.args.get('endDate')
 
-    start_date, end_date, error_response, status_code = get_and_validate_dates(start_date_str, end_date_str)
+    start_date, end_date, error_response, status_code = get_and_validate_dates(start_date_str, end_date_str, default_start_date, default_end_date)
     if error_response:
         return jsonify(error_response), status_code
     data = {
@@ -105,19 +104,23 @@ def get_basic_stats():
     end_date_str = request.args.get('endDate')
     dataframe_name = request.args.get('dataframe')
 
+
     if not dataframe_name:
         print('Using all data since no dataframe name was provided')
+        local_df = df
     elif dataframe_name not in all_dfs:
         return jsonify({'error': f'Invalid dataframe name: {dataframe_name}'}), 400
     else:
-        df = all_dfs[dataframe_name]
+        local_df = all_dfs[dataframe_name]
 
-    start_date, end_date, error_response, status_code = get_and_validate_dates(start_date_str, end_date_str)
-
-    date_filtered_df = apply_date_interval(df, start_date, end_date)
+    start_date, end_date, error_response, status_code = get_and_validate_dates(start_date_str, end_date_str, default_start_date, default_end_date)
 
     if error_response:
         return jsonify(error_response), status_code
+    
+    date_filtered_df = apply_date_interval(local_df, start_date, end_date)
+    date_filtered_high_persuasive = apply_date_interval(all_dfs['high_persuasive_df'], start_date, end_date)
+    date_filtered_low_persuasive = apply_date_interval(all_dfs['low_persuasive_df'], start_date, end_date)
 
     data = {
         'title': 'Basic Stats',
@@ -130,8 +133,8 @@ def get_basic_stats():
             'average_spend_per_ad': date_filtered_df['mean_spend'].mean(),
             'average_impressions_per_ad': date_filtered_df['mean_impressions'].mean(),
             'total_number_of_unique_funding_entities': date_filtered_df['funding_entity'].nunique(),
-            'proportion_high_persuasive': all_dfs['high_persuasive_df'].shape[0] / df.shape[0], # makes sene only when df is the main df
-            'proportion_low_persuasive': all_dfs['low_persuasive_df'].shape[0] / df.shape[0], # makes sene only when df is the main df
+            'proportion_high_persuasive': date_filtered_high_persuasive.shape[0] / date_filtered_df.shape[0], # makes sene only when df is the main df
+            'proportion_low_persuasive': date_filtered_low_persuasive.shape[0] / date_filtered_df.shape[0], # makes sene only when df is the main df
             'percentage_ads_persuasive_ration_gt_0': date_filtered_df[date_filtered_df['persuasive_ratio'] > 0].shape[0] / date_filtered_df.shape[0], # makes sene only when df is the main df
             'avg_campaign_duration': (date_filtered_df['ad_delivery_stop_time'] - date_filtered_df['ad_delivery_start_time']).mean().days # TODO check if makes sense
         }
@@ -196,7 +199,7 @@ def get_time_series():
     start_date_str = request.args.get('startDate')
     end_date_str = request.args.get('endDate')
 
-    start_date, end_date, error_response, status_code = get_and_validate_dates(start_date_str, end_date_str)
+    start_date, end_date, error_response, status_code = get_and_validate_dates(start_date_str, end_date_str, default_start_date, default_end_date)
     if error_response:
         return jsonify(error_response), status_code
     

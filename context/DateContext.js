@@ -5,7 +5,7 @@ import React, { createContext, useState, useContext } from "react";
 const DateContext = createContext();
 
 export const DateProvider = ({ children }) => {
-  const [startDate, setStartDate] = useState("2022-02-15");
+  const [startDate, setStartDate] = useState("2022-03-01");
   const [endDate, setEndDate] = useState("2022-06-01");
 
   return (

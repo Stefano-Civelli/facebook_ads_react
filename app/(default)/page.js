@@ -13,7 +13,7 @@ export default function Home() {
           <Sidebar />
         </div>
         <div className="grid grid-cols-1 col-span-3 gap-4">
-          <GridItem>
+          <GridItem className="h-[650px]">
             <LineChartComponent />
           </GridItem>
           <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">

@@ -18,15 +18,16 @@ def read_data(file_path, start_date, end_date):
     df['ad_delivery_start_time'] = pd.to_datetime(df['ad_delivery_start_time'])
     df['ad_delivery_stop_time'] = pd.to_datetime(df['ad_delivery_stop_time'], errors='coerce')  # Coerce errors for NaNs
 
-    df['tokenized_text'] = df['tokenized_text'].apply(ast.literal_eval)
-    df['demographic_distribution'] = df['demographic_distribution'].apply(ast.literal_eval)
-    df['region_distribution'] = df['region_distribution'].apply(ast.literal_eval)
-    df['sentences'] = df['sentences'].apply(ast.literal_eval)
-    df['sentence_confidence_scores'] = df['sentence_confidence_scores'].apply(ast.literal_eval)
+    df['tokenized_text'] = df['tokenized_text'].apply(safe_eval)
+    df['demographic_distribution'] = df['demographic_distribution'].apply(safe_eval)
+    df['region_distribution'] = df['region_distribution'].apply(safe_eval)
+    df['sentences'] = df['sentences'].apply(safe_eval)
+    df['sentence_confidence_scores'] = df['sentence_confidence_scores'].apply(safe_eval)
 
 
     # drop rows where ad_delivery_stop_time is missing
     df = df.dropna(subset=['ad_delivery_stop_time'])
+    df = df.dropna(subset=['ad_delivery_start_time'])
     # drop ads where the ad_creative_link_caption is atsijobs.com.au
     #df = df[df['ad_creative_link_caption'] != 'atsijobs.com.au']
     # drop ads where the page_name is Indigenous Employment Australia
