@@ -25,86 +25,26 @@ def read_data(file_path, start_date, end_date):
     df['sentence_confidence_scores'] = df['sentence_confidence_scores'].apply(safe_eval)
 
 
-    # drop rows where ad_delivery_stop_time is missing
-    df = df.dropna(subset=['ad_delivery_stop_time'])
-    df = df.dropna(subset=['ad_delivery_start_time'])
+    # Drop rows where ad_delivery_stop_time or ad_delivery_start_time is missing
+    df = df.dropna(subset=['ad_delivery_stop_time', 'ad_delivery_start_time'])
     # drop ads where the ad_creative_link_caption is atsijobs.com.au
     #df = df[df['ad_creative_link_caption'] != 'atsijobs.com.au']
     # drop ads where the page_name is Indigenous Employment Australia
     #df = df[df['page_name'] != 'Indigenous Employment Australia']
-
-    df = df[df['ad_delivery_start_time'] >= start_date]
-    df = df[df['ad_delivery_stop_time'] <= end_date]
+    df = df[(df['ad_delivery_start_time'] >= start_date) & (df['ad_delivery_stop_time'] <= end_date)]
 
     # drop columns with more than 70% missing values
-    threshold = 0.7
+    threshold = 0.7 # TODO Maybe this is the reason we are deleting some UAP ads.
     df = df.loc[:, df.isnull().mean() < threshold]
 
-    high_persuasive_mask = df['persuasive_ratio'] > 0.8
-
-    low_persuasive_mask = df['persuasive_ratio'] < 0.2
-
-    medium_persuasive_mask = ~(high_persuasive_mask | low_persuasive_mask)
-
-
-
-
-    liberal_mask = (df['party'] == 'Liberal') | \
-               (df['party'] == 'Liberal Nationals (QLD)') | \
-               (df['party'] == 'Nationals') | \
-               (df['party'] == 'Country Liberal (NT)') | \
-               (df['party'] == 'New Liberals')
-    # Country Liberal (NT) e New Liberals non sarebbero da considere
-
-    labor_mask = df['party'] == 'Labor'
-
-    greens_mask = df['party'] == 'Greens'
-
-    independents_mask = df['party'] == 'Independent'
-
-    other_parties_mask = ~(liberal_mask | labor_mask | greens_mask | independents_mask)
-
-    main_parties_mask = (liberal_mask | labor_mask | greens_mask | independents_mask)
-
-    has_a_party_mask = df['party'].notnull()
-
-    # Using the masks to create DataFrames
-    liberal_df = df[liberal_mask]
-    labor_df = df[labor_mask]
-    greens_df = df[greens_mask]
-    independents_df = df[independents_mask]
-    other_parties_df = df[other_parties_mask]
-    main_parties_df = df[main_parties_mask]
-    has_party_df = df[has_a_party_mask]
-    high_persuasive_df = df[high_persuasive_mask]
-    low_persuasive_df = df[low_persuasive_mask]
-    medium_persuasive_df = df[medium_persuasive_mask]
-
-    all_dfs = {'liberal_df': liberal_df,
-                'labor_df': labor_df,
-                'greens_df': greens_df,
-                'independents_df': independents_df,
-                'main_parties_df': main_parties_df,
-                'other_parties_df': other_parties_df,
-                'has_party_df': has_party_df,
-                'high_persuasive_df': high_persuasive_df,
-                'low_persuasive_df': low_persuasive_df,
-                'medium_persuasive_df': medium_persuasive_df}
-
-    party_dfs = {'liberal_df': liberal_df,
-                'labor_df': labor_df,
-                'greens_df': greens_df,
-                'independents_df': independents_df}
-
-
+    # Create new columns for filtering
+    df['high_persuasive'] = df['persuasive_ratio'] > 0.8
+    df['low_persuasive'] = df['persuasive_ratio'] < 0.2
+    df['medium_persuasive'] = ~(df['high_persuasive'] | df['low_persuasive'])
+    df['persuasiveness'] = df['persuasive_ratio'].apply(lambda x: 'High' if x > 0.8 else 'Low' if x < 0.2 else 'Other')
     df['macro_party'] = df.apply(assign_macro_party, axis=1)
+    df['has_party'] = df['macro_party'].notnull()
+    # main party when macro_party is not null and not 'Other'
+    df['is_main_party'] = df['macro_party'].notnull() & (df['macro_party'] != 'Other')
 
-
-    return df, all_dfs, party_dfs
-
-
-
-
-
-
-
+    return df

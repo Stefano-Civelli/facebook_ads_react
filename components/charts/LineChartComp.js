@@ -20,64 +20,31 @@ import { useState } from "react";
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
-// const salesData = [
-//   {
-//     name: "Jan",
-//     revenue: 4000,
-//     profit: 2400,
-//   },
-//   {
-//     name: "Feb",
-//     revenue: 3000,
-//     profit: 1398,
-//   },
-//   {
-//     name: "Mar",
-//     revenue: 9800,
-//     profit: 2000,
-//   },
-//   {
-//     name: "Apr",
-//     revenue: 3908,
-//     profit: 2780,
-//   },
-//   {
-//     name: "May",
-//     revenue: 4800,
-//     profit: 1890,
-//   },
-//   {
-//     name: "Jun",
-//     revenue: 3800,
-//     profit: 2390,
-//   },
-// ];
-
 const LineChartComponent = () => {
   const { startDate, endDate } = useDateContext();
-  const [partySpend, setPartySpend] = useState("Labor");
-  const [partyImpressions, setPartyImpressions] = useState("Labor");
+  const [party1, setParty1] = useState("Labor");
+  const [party2, setParty2] = useState("Liberal");
 
   const {
-    data: dataSpend,
-    error: errorSpend,
-    isLoading: isLoadingSpend,
+    data: data1,
+    error: error1,
+    isLoading: isLoading1,
   } = useSWR(
-    `http://127.0.0.1:5000/api/time-series?startDate=${startDate}&endDate=${endDate}&party=${partySpend}&metric=spend`,
+    `http://127.0.0.1:5000/api/time-series?startDate=${startDate}&endDate=${endDate}&party=${party1}`,
     fetcher
   );
 
   const {
-    data: dataImpressions,
-    error: errorImpressions,
-    isLoading: isLoadingImpressions,
+    data: data2,
+    error: error2,
+    isLoading: isLoading2,
   } = useSWR(
-    `http://127.0.0.1:5000/api/time-series?startDate=${startDate}&endDate=${endDate}&party=${partyImpressions}&metric=impressions`,
+    `http://127.0.0.1:5000/api/time-series?startDate=${startDate}&endDate=${endDate}&party=${party2}`,
     fetcher
   );
 
-  if (errorSpend || errorImpressions) return <div>failed to load</div>;
-  if (isLoadingSpend || isLoadingImpressions)
+  if (error1 || error2) return <div>Failed to load</div>;
+  if (isLoading1 || isLoading2)
     return (
       <div className="h-[300px] flex items-center">
         <span className="loading loading-spinner loading-lg"></span>
@@ -86,16 +53,16 @@ const LineChartComponent = () => {
 
   return (
     <div className=" w-full flex flex-col items-center justify-center h-full">
-      <h3 className="text-lg font-semibold text-white ">{dataSpend.title}</h3>
+      <h3 className="text-lg font-semibold text-white ">{data1.title}</h3>
       <div className="w-full relative">
         <PartySelector
-          value={partySpend}
-          onChange={(e) => setPartySpend(e.target.value)}
+          value={party1}
+          onChange={(e) => setParty1(e.target.value)}
         />
 
         <ResponsiveContainer width="100%" height={270}>
           <LineChart
-            data={dataSpend.data}
+            data={data1.data}
             syncId="timeSeriesCharts"
             margin={{
               right: 30,
@@ -108,13 +75,13 @@ const LineChartComponent = () => {
             <XAxis dataKey="date" tickFormatter={formatDate} />
             <YAxis tickFormatter={(x) => `${x / 1000000}M`} />
 
-            <Tooltip content={<CustomTooltipSpend />} />
+            <Tooltip content={<CustomTooltipImpressions />} />
             <Legend />
             <Line
               type="monotone"
-              dataKey="df1_mean_spend"
+              dataKey="high_persuasive_impressions"
               stroke={chartColors.chart_color_1}
-              name="Mean Spend High Persuasive"
+              name="Mean Impressions High Persuasive"
               dot={{ r: 1, strokeWidth: 0 }}
               activeDot={{
                 strokeWidth: 0,
@@ -125,9 +92,9 @@ const LineChartComponent = () => {
 
             <Line
               type="monotone"
-              dataKey="df2_mean_spend"
+              dataKey="low_persuasive_impressions"
               stroke={chartColors.chart_color_3}
-              name="Mean Spend Low Persuasive"
+              name="Mean Impressions Low Persuasive"
               dot={{ r: 1, strokeWidth: 0 }}
               activeDot={{
                 strokeWidth: 0,
@@ -163,12 +130,12 @@ const LineChartComponent = () => {
 
       <div className="w-full relative">
         <PartySelector
-          value={partyImpressions}
-          onChange={(e) => setPartyImpressions(e.target.value)}
+          value={party2}
+          onChange={(e) => setParty2(e.target.value)}
         />
         <ResponsiveContainer width="100%" height={270}>
           <LineChart
-            data={dataImpressions.data}
+            data={data2.data}
             syncId="timeSeriesCharts"
             margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
           >
@@ -179,7 +146,7 @@ const LineChartComponent = () => {
             <Legend />
             <Line
               type="monotone"
-              dataKey="df1_mean_impressions"
+              dataKey="high_persuasive_impressions"
               stroke={chartColors.chart_color_1}
               name="Mean Impressions High Persuasive"
               dot={{ r: 1, strokeWidth: 0 }}
@@ -191,7 +158,7 @@ const LineChartComponent = () => {
             />
             <Line
               type="monotone"
-              dataKey="df2_mean_impressions"
+              dataKey="low_persuasive_impressions"
               stroke={chartColors.chart_color_3}
               name="Mean Impressions Low Persuasive"
               dot={{ r: 1, strokeWidth: 0 }}
@@ -216,21 +183,21 @@ const LineChartComponent = () => {
 
 export default LineChartComponent;
 
-const CustomTooltipSpend = ({ active, payload, label }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="p-4 bg-slate-900 flex flex-col gap-4 rounded-md">
-        <p className="text-medium text-lg">{formatDate(label)}</p>
-        <p className="text-sm" style={{ color: payload[0].stroke }}>
-          <span className="ml-2">${formatNumber(payload[0].value)}</span>
-        </p>
-        <p className="text-sm" style={{ color: payload[1].stroke }}>
-          <span className="ml-2">${formatNumber(payload[1].value)}</span>
-        </p>
-      </div>
-    );
-  }
-};
+// const CustomTooltipSpend = ({ active, payload, label }) => {
+//   if (active && payload && payload.length) {
+//     return (
+//       <div className="p-4 bg-slate-900 flex flex-col gap-4 rounded-md">
+//         <p className="text-medium text-lg">{formatDate(label)}</p>
+//         <p className="text-sm" style={{ color: payload[0].stroke }}>
+//           <span className="ml-2">${formatNumber(payload[0].value)}</span>
+//         </p>
+//         <p className="text-sm" style={{ color: payload[1].stroke }}>
+//           <span className="ml-2">${formatNumber(payload[1].value)}</span>
+//         </p>
+//       </div>
+//     );
+//   }
+// };
 
 const CustomTooltipImpressions = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -259,6 +226,7 @@ const PartySelector = ({ value, onChange }) => {
       <option value="Liberal">Liberal</option>
       <option value="Greens">Greens</option>
       <option value="Independents">Independents</option>
+      <option value="UAP">United Australia Party</option>
       <option value="All">All</option>
     </select>
   );

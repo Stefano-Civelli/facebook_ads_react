@@ -1,6 +1,7 @@
 import ast
 from datetime import datetime
 import pandas as pd
+import config
 
 
 def clean_string(name):
@@ -18,44 +19,33 @@ def safe_eval(x):
             return ast.literal_eval(x)
         except (ValueError, SyntaxError):
             return None
-        
-
 
 
 def assign_macro_party(row):
     """
-    Assigns a macro party to each row based on the party column
+    Assigns a macro party to each row based on the party column.
+    Returns 'Other' for known parties not in main categories,
+    keeps null values as is, and assigns main parties as before.
     """
-    if row['party'] in ['Liberal', 'Liberal Nationals (QLD)', 'Nationals', 'Country Liberal (NT)', 'New Liberals']:
+    if pd.isnull(row['party']):
+        return None
+    elif row['party'] in ['Liberal', 'Liberal Nationals (QLD)', 'Nationals', 'Country Liberal (NT)', 'New Liberals']:
         return 'Liberal'
     elif row['party'] == 'Labor':
         return 'Labor'
     elif row['party'] == 'Greens':
-        return 'Green'
+        return 'Greens'
     elif row['party'] == 'Independent':
-        return 'Independent'
-    else:
-        return 'Other'
-    
-def assign_macro_party_with_uap(row):
-    if row['party'] in ['Liberal', 'Liberal Nationals (QLD)', 'Nationals', 'Country Liberal (NT)', 'New Liberals']:
-        return 'Liberal'
-    elif row['party'] == 'Labor':
-        return 'Labor'
-    elif row['party'] == 'Greens':
-        return 'Green'
-    elif row['party'] == 'Independent':
-        return 'Independent'
+        return 'Independents'
     elif row['party'] == 'United Australia Party':
-        return 'United Australia Party'
+        return 'UAP'
     else:
         return 'Other'
-    
 
 def expand_rows_spreading_spend(row):
     days = pd.date_range(start=row['ad_delivery_start_time'], end=row['ad_delivery_stop_time'])
     days_count = len(days)
-    return pd.DataFrame({
+    expanded_df = pd.DataFrame({
         'date': days,
         'mean_spend': row['mean_spend'] / days_count,  # Distribute spend evenly
         'mean_impressions': row['mean_impressions'] / days_count,
@@ -64,52 +54,92 @@ def expand_rows_spreading_spend(row):
         'impressions.lower_bound': row['impressions.lower_bound'] / days_count,
         'impressions.upper_bound': row['impressions.upper_bound'] / days_count,
         'ad_id': row['id'],
+        'high_persuasive': row['high_persuasive'], # new
+        'low_persuasive': row['low_persuasive'], # new
+        'macro_party': row['macro_party'] # new
     })
-
+    
+    return expanded_df
 
 
 def get_daily_data(df):
     # Apply the function to each row and concatenate the results
-    expanded_df = pd.concat([expand_rows_spreading_spend(row) for index, row in df.iterrows()])
+    expanded_df = pd.concat([expand_rows_spreading_spend(row) for _, row in df.iterrows()])
     
-    # Aggregate the expanded DataFrame by day
+    # Pre-calculate high and low persuasive values
+    expanded_df['high_persuasive_impressions'] = expanded_df['mean_impressions'] * expanded_df['high_persuasive']
+    expanded_df['low_persuasive_impressions'] = expanded_df['mean_impressions'] * expanded_df['low_persuasive']
+    expanded_df['high_persuasive_spend'] = expanded_df['mean_spend'] * expanded_df['high_persuasive']
+    expanded_df['low_persuasive_spend'] = expanded_df['mean_spend'] * expanded_df['low_persuasive']
+    
+    # Aggregate the expanded DataFrame by date
     daily_data = expanded_df.groupby('date').agg({
-        'mean_spend': 'sum',
         'mean_impressions': 'sum',
-        'spend.lower_bound': 'sum',
-        'spend.upper_bound': 'sum',
-        'impressions.lower_bound': 'sum',
-        'impressions.upper_bound': 'sum',
-        'ad_id': 'count'
-    }).rename(columns={'ad_id': 'ad_count'})
+        'high_persuasive_impressions': 'sum',
+        'low_persuasive_impressions': 'sum',
+        'mean_spend': 'sum',
+        'high_persuasive_spend': 'sum',
+        'low_persuasive_spend': 'sum'
+    })
     
-    # Calculate the 3-day moving averages for all relevant metrics
-    metrics = ['mean_spend', 'mean_impressions', 'ad_count', 
-               'spend.lower_bound', 'spend.upper_bound', 
-               'impressions.lower_bound', 'impressions.upper_bound']
+    # Rename columns for consistency
+    daily_data.columns = [
+        'mean_impressions_total',
+        'mean_impressions_high_persuasive',
+        'mean_impressions_low_persuasive',
+        'mean_spend_total',
+        'mean_spend_high_persuasive',
+        'mean_spend_low_persuasive'
+    ]
     
-    for metric in metrics:
-            daily_data[f'{metric}_ma3'] = daily_data[metric].rolling(window=3).mean()
-        
+    # Calculate the 3-day moving averages
+    for col in daily_data.columns:
+        daily_data[f'{col}_ma3'] = daily_data[col].rolling(window=3).mean()
+    
     return daily_data
 
+# def get_daily_data(df): 1st version
+#     # Apply the function to each row and concatenate the results
+#     expanded_df = pd.concat([expand_rows_spreading_spend(row) for index, row in df.iterrows()])
+    
+#     # Aggregate the expanded DataFrame by day
+#     daily_data = expanded_df.groupby('date').agg({
+#         'mean_spend': 'sum',
+#         'mean_impressions': 'sum',
+#         'spend.lower_bound': 'sum',
+#         'spend.upper_bound': 'sum',
+#         'impressions.lower_bound': 'sum',
+#         'impressions.upper_bound': 'sum',
+#         'ad_id': 'count'
+#     }).rename(columns={'ad_id': 'ad_count'})
+    
+#     # Calculate the 3-day moving averages for all relevant metrics
+#     metrics = ['mean_spend', 'mean_impressions', 'ad_count', 
+#                'spend.lower_bound', 'spend.upper_bound', 
+#                'impressions.lower_bound', 'impressions.upper_bound']
+    
+#     for metric in metrics:
+#             daily_data[f'{metric}_ma3'] = daily_data[metric].rolling(window=3).mean()
+        
+#     return daily_data
 
 
 
 
 
-def get_and_validate_dates(start_date_str, end_date_str, default_start_date, default_end_date):
+# TODO refactor after moving default dates to a config file so they are not taken as a parameter.
+def get_and_validate_dates(start_date_str, end_date_str):
     
     if not start_date_str and not end_date_str:
         print("Using default start and end dates.")
-        return default_start_date, default_end_date, None, 200
+        return config.default_start_date, config.default_end_date, None, 200
     
 
     if not start_date_str:
         print("Using default start date.")
         try:
             end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
-            return default_start_date, end_date, None, 200
+            return config.default_start_date, end_date, None, 200
         except ValueError:
             return None, None, {"error": "Invalid date format. Use YYYY-MM-DD"}, 400
         
@@ -117,7 +147,7 @@ def get_and_validate_dates(start_date_str, end_date_str, default_start_date, def
         print("Using default end date.")
         try:
             start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
-            return start_date, default_end_date, None, 200
+            return start_date, config.default_end_date, None, 200
         except ValueError:
             return None, None, {"error": "Invalid date format. Use YYYY-MM-DD"}, 400
         
@@ -171,14 +201,3 @@ def apply_date_interval(data, start_date, end_date):
         return data[(data['ad_delivery_start_time'] >= start_date) & (data['ad_delivery_stop_time'] <= end_date)]
     else:
         raise TypeError("Input must be a DataFrame or a dictionary of DataFrames")
-
-
-# def apply_date_interval(df, start_date, end_date):
-#     if start_date is not None and end_date is not None:
-#         return df[(df['ad_delivery_start_time'] >= start_date) & (df['ad_delivery_stop_time'] <= end_date)]
-#     elif start_date is not None:
-#         return df[df['ad_delivery_start_time'] >= start_date]
-#     elif end_date is not None:
-#         return df[df['ad_delivery_stop_time'] <= end_date]
-#     else:
-#         return df
