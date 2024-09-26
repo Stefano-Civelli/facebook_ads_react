@@ -37,8 +37,6 @@ def assign_macro_party(row):
         return 'Greens'
     elif row['party'] == 'Independent':
         return 'Independents'
-    elif row['party'] == 'United Australia Party':
-        return 'UAP'
     else:
         return 'Other'
 
@@ -201,3 +199,14 @@ def apply_date_interval(data, start_date, end_date):
         return data[(data['ad_delivery_start_time'] >= start_date) & (data['ad_delivery_stop_time'] <= end_date)]
     else:
         raise TypeError("Input must be a DataFrame or a dictionary of DataFrames")
+    
+
+def calculate_gender_impressions(dataframe):
+    gender_impressions = dataframe.groupby('gender').apply(
+        lambda x: (x['mean_impressions'] * x['percentage']).sum()
+    ).to_dict()
+    
+    return {
+        'male': round(gender_impressions.get('male', 0)),
+        'female': round(gender_impressions.get('female', 0))
+    }

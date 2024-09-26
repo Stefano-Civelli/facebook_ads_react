@@ -45,6 +45,23 @@ def read_data(file_path, start_date, end_date):
     df['macro_party'] = df.apply(assign_macro_party, axis=1)
     df['has_party'] = df['macro_party'].notnull()
     # main party when macro_party is not null and not 'Other'
-    df['is_main_party'] = df['macro_party'].notnull() & (df['macro_party'] != 'Other')
+    df['is_main_party'] = df['macro_party'].notnull() & (df['macro_party'] != 'Other') & (df['macro_party'] != 'UAP') 
 
     return df
+
+
+def make_demographics_df(df):
+    df_demographics = df[df['demographic_distribution'].notnull()].copy()
+    df_demographics = df_demographics[['id', 'demographic_distribution', 'mean_impressions', 'ad_delivery_start_time', 'ad_delivery_stop_time', 'macro_party', 'high_persuasive', 'low_persuasive']]
+    df_demographics = df_demographics.explode('demographic_distribution')
+    # Convert dictionary entries into separate columns
+    df_demographics = pd.concat([df_demographics.drop(['demographic_distribution'], axis=1),
+                                 df_demographics['demographic_distribution'].apply(pd.Series)], axis=1)
+
+    print(f'Percentage of 13-17 age group: {df_demographics[df_demographics["age"] == "13-17"].shape[0] / df_demographics.shape[0]:.3f}')
+
+    df_demographics = df_demographics[df_demographics['age'] != '13-17']
+    df_demographics = df_demographics[df_demographics['gender'] != 'unknown']
+    df_demographics['percentage'] = df_demographics['percentage'].astype(float)
+    
+    return df_demographics

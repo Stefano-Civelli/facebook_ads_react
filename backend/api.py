@@ -1,14 +1,15 @@
 import os
 import sys
 
-from util import apply_date_interval, clean_string, get_and_validate_dates, get_daily_data
+from util import apply_date_interval, calculate_gender_impressions, clean_string, get_and_validate_dates, get_daily_data
 print(f'default sys.path: {sys.path}')
 from flask import Flask, jsonify, request
 import pandas as pd
-from data_processing import read_data
+from data_processing import make_demographics_df, read_data
 from flask_cors import CORS
 from datetime import datetime
 import config
+from collections import OrderedDict
 
 PROJ_ROOT = os.path.abspath(os.path.join(os.pardir))
 sys.path.append(PROJ_ROOT)
@@ -22,14 +23,13 @@ CORS(app)
 # Load the CSV data once at startup
 df = read_data(config.file_path, config.default_start_date, config.default_end_date)
 
+print(f'Making demographics df')
+df_demographics = make_demographics_df(df)
+age_order = ['18-24', '25-34', '35-44', '45-54', '55-64', '65+']
+df_demographics['age'] = pd.Categorical(df_demographics['age'], categories=age_order, ordered=True)
+print(f'Demographics df made')
 
-# Prepare the data to be served
-party_spend_data = df[df['is_main_party']].groupby('macro_party')['mean_spend'].sum().reset_index()
-party_spend_data = party_spend_data.sort_values('mean_spend', ascending=False)
-party_spend_data = [{'label': clean_string(row['macro_party']), 'value': row['mean_spend']} 
-                    for _, row in party_spend_data.iterrows()]
-
-
+# Prepare data to be served --------------------------------------------------------
 
 def prepare_data_for_timeseries_api(df):
     print('Preparing data for time series API')
@@ -83,23 +83,6 @@ def get_timeseries_data(processed_data, party_str):
 print('Server ready')
 
 # ---------------------------- API ---------------------------- #
-# @app.route('/api/party-spend')
-# def get_party_spend():
-#     start_date_str = request.args.get('startDate')
-#     end_date_str = request.args.get('endDate')
-
-#     start_date, end_date, error_response, status_code = get_and_validate_dates(start_date_str, end_date_str)
-#     if error_response:
-#         return jsonify(error_response), status_code
-#     data = {
-#         'title': 'Party Spend',
-#         'description': 'Total spend by each party',
-#         'x_label': 'Spend (Millions $)',
-#         'y_label': 'Party',
-#         'data': party_spend_data
-#     }
-#     return jsonify(data)
-
 
 @app.route('/api/party-spend')
 def get_party_spend():
@@ -110,55 +93,51 @@ def get_party_spend():
     if error_response:
         return jsonify(error_response), status_code
 
-    # Filter the dataframe based on the date range and main parties
     filtered_df = df[(df['ad_delivery_start_time'] >= start_date) & 
                      (df['ad_delivery_stop_time'] <= end_date) & 
-                     (df['is_main_party'])] # TODO non credo qua ci vada is_main_party, controllare anche da altre parti
+                     (df['macro_party'].notnull())]
 
-    # Group by party and persuasiveness, and calculate metrics
-    grouped_data = filtered_df.groupby(['macro_party', 'persuasiveness']).agg({
-        'mean_spend': 'sum',
-        'mean_impressions': 'sum',
-        'id': 'count'
-    }).reset_index()
+    party_data = {}
+    for party in filtered_df['macro_party'].unique():
+        party_df = filtered_df[filtered_df['macro_party'] == party]
+        high_persuasive_df = party_df[party_df['high_persuasive']]
+        low_persuasive_df = party_df[party_df['low_persuasive']]
 
-    # Pivot the data to get the desired format
-    party_data = grouped_data.pivot(index='macro_party', columns='persuasiveness', 
-                                    values=['mean_spend', 'mean_impressions', 'id'])
+        party_data[party] = {
+            'total_spend': float(party_df['mean_spend'].sum()),
+            'high_persuasive_spend': float(high_persuasive_df['mean_spend'].sum()),
+            'low_persuasive_spend': float(low_persuasive_df['mean_spend'].sum())
+        }
 
-    # Flatten column names and rename
-    party_data.columns = [f'{col[1]}_{col[0]}' for col in party_data.columns]
-    party_data = party_data.rename(columns={
-        'high_mean_spend': 'high_persuasive_spend',
-        'low_mean_spend': 'low_persuasive_spend',
-        'high_mean_impressions': 'high_persuasive_impressions',
-        'low_mean_impressions': 'low_persuasive_impressions',
-        'high_id': 'number_high_persuasive',
-        'low_id': 'number_low_persuasive'
-    })
+    return jsonify(party_data)
 
-    # Calculate totals
-    party_data['total_spend'] = filtered_df['mean_spend'].sum()
-    party_data['total_impressions'] = filtered_df['mean_impressions'].sum()
-    party_data['number_of_ads'] = filtered_df.shape[0]
+@app.route('/api/party-impressions')
+def get_party_impressions():
+    start_date_str = request.args.get('startDate')
+    end_date_str = request.args.get('endDate')
 
-    # Sort by total spend and reset index
-    party_data = party_data.sort_values('total_spend', ascending=False).reset_index()
+    start_date, end_date, error_response, status_code = get_and_validate_dates(start_date_str, end_date_str)
+    if error_response:
+        return jsonify(error_response), status_code
 
-    # Convert to list of dictionaries
-    party_spend_data = party_data.to_dict('records')
+    filtered_df = df[(df['ad_delivery_start_time'] >= start_date) & 
+                     (df['ad_delivery_stop_time'] <= end_date) & 
+                     (df['macro_party'].notnull())]
 
-    # Clean party names
-    for item in party_spend_data:
-        item['macro_party'] = clean_string(item['macro_party'])
+    party_data = {}
+    for party in filtered_df['macro_party'].unique():
+        party_df = filtered_df[filtered_df['macro_party'] == party]
+        high_persuasive_df = party_df[party_df['high_persuasive']]
+        low_persuasive_df = party_df[party_df['low_persuasive']]
 
-    data = {
-        'title': 'Party Spend and Metrics',
-        'description': 'Total spend and other metrics by each party',
-        'data': party_spend_data
-    }
+        party_data[party] = {
+            'total_impressions': int(party_df['mean_impressions'].sum()),
+            'high_persuasive_impressions': int(high_persuasive_df['mean_impressions'].sum()),
+            'low_persuasive_impressions': int(low_persuasive_df['mean_impressions'].sum()),
+        }
 
-    return jsonify(data)
+    return jsonify(party_data)
+
 
 @app.route('/api/general-stats')
 def get_basic_stats():
@@ -319,6 +298,35 @@ def get_spend_and_impressions_by_region():
 #         'data': party_spend_data
 #     }
 #     return jsonify(data)
+
+
+@app.route('/api/gender-impressions')
+def get_gender_impressions():
+    start_date_str = request.args.get('startDate')
+    end_date_str = request.args.get('endDate')
+
+    start_date, end_date, error_response, status_code = get_and_validate_dates(start_date_str, end_date_str)
+    if error_response:
+        return jsonify(error_response), status_code
+
+    filtered_df = df_demographics[
+        (df_demographics['ad_delivery_start_time'] >= start_date) & 
+        (df_demographics['ad_delivery_stop_time'] <= end_date) & 
+        (df_demographics['macro_party'].notnull())
+    ]
+
+    result = {}
+    for party in filtered_df['macro_party'].unique():
+        party_df = filtered_df[filtered_df['macro_party'] == party]
+        
+        result[party] = {
+            'total': calculate_gender_impressions(party_df),
+            'high_persuasive': calculate_gender_impressions(party_df[party_df['high_persuasive']]),
+            'low_persuasive': calculate_gender_impressions(party_df[party_df['low_persuasive']])
+        }
+
+    return jsonify(result)
+
 
 
 # TODO do a final check on the API

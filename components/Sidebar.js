@@ -1,7 +1,7 @@
 "use client";
 
 import DateSelector from "./DateSelectorComp";
-import Selectors from "./Selectors";
+
 import { useDateContext } from "../context/DateContext";
 
 const Sidebar = () => {
@@ -9,11 +9,12 @@ const Sidebar = () => {
 
   return (
     <div className=" w-full sticky top-12 md:h-screen p-5 overflow-y-auto border border-slate-900 bg-slate-900/50">
-      <h2>Select Options</h2>
-      <Selectors />
-      <Selectors />
-      <Selectors />
-
+      <DateSelector
+        startDate={startDate}
+        endDate={endDate}
+        onStartDateChange={setStartDate}
+        onEndDateChange={setEndDate}
+      />
       <label className="label cursor-pointer justify-start pb-0">
         <input type="checkbox" defaultChecked className="checkbox-xs" />
         <span className="label-text ml-4">Labor Party</span>
@@ -30,13 +31,6 @@ const Sidebar = () => {
         <input type="checkbox" defaultChecked className="checkbox-xs" />
         <span className="label-text ml-4">Indipendents Party</span>
       </label>
-
-      <DateSelector
-        startDate={startDate}
-        endDate={endDate}
-        onStartDateChange={setStartDate}
-        onEndDateChange={setEndDate}
-      />
     </div>
   );
 };

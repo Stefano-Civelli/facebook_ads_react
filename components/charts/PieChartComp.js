@@ -47,9 +47,9 @@ const ImpressionsPieComponent = () => {
   ];
 
   const COLORS = [
-    chartColors.chart_color_1,
-    chartColors.chart_color_2,
     chartColors.chart_color_3,
+    chartColors.chart_color_2,
+    chartColors.chart_color_1,
   ];
 
   const onPieEnter = (_, index) => {
