@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:remote": "sst bind next dev",
+    "deploy": "sst deploy --stage=prod",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -24,9 +26,12 @@
     "tailwind-merge": "^2.5.2"
   },
   "devDependencies": {
+    "aws-cdk-lib": "2.142.1",
+    "constructs": "10.3.0",
     "eslint": "^8",
     "eslint-config-next": "14.2.5",
     "postcss": "^8",
+    "sst": "2.43.7",
     "tailwindcss": "^3.4.1"
   }
 }

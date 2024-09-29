@@ -42,3 +42,10 @@ next-env.d.ts
 *.pkl
 
 __pycache__/
+
+# sst
+.sst
+
+# open-next
+.open-next
+*/.idea
