@@ -83,10 +83,10 @@ const ImpressionsPieComponent = () => {
 
     return (
       <g>
-        <text x={cx} y={cy - 10} dy={8} textAnchor="middle" fill={fill}>
+        <text x={cx} y={cy - 10} dy={8} textAnchor="middle" fill="#FFFFFF">
           {payload.name.split(" ")[0]}
         </text>
-        <text x={cx} y={cy + 10} dy={8} textAnchor="middle" fill={fill}>
+        <text x={cx} y={cy + 10} dy={8} textAnchor="middle" fill="#FFFFFF">
           {payload.name.split(" ")[1] || ""}
         </text>
         <Sector
@@ -131,7 +131,7 @@ const ImpressionsPieComponent = () => {
           textAnchor={textAnchor}
           fill="#999"
         >
-          {`Impressions: ${formatMillions(value)}`}
+          {`Imp: ${formatMillions(value)}`}
         </text>
         <text
           x={ex + (cos >= 0 ? 1 : -1) * 12}
@@ -179,7 +179,7 @@ const ImpressionsPieComponent = () => {
         </Pie>
       </PieChart>
 
-      <text x="98%" y="98%" textAnchor="end" fill="#999" fontSize="6">
+      <text className="absolute bottom-2 right-2" fontSize="6">
         *CPTI: Cost Per Thousand Impressions
       </text>
     </ResponsiveContainer>

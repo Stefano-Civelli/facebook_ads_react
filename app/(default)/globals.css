@@ -144,6 +144,14 @@ div {
   list-style: none;
   
   }
+
+  /* ul[role="list"] {
+    list-style: disc;
+  }
+  
+  ol[role="list"] {
+    list-style: decimal;
+  } */
   
   /* Set core root defaults */
   
@@ -321,4 +329,33 @@ div {
   /* ------------------------------------------------------------------------ */
 
 
+  .long-description-content {
+    font-size: 14px;
+    line-height: 1.6;
+  }
   
+  .long-description-content p {
+    margin-bottom: 1em;
+  }
+  
+  .long-description-content strong {
+    font-weight: 600;
+  }
+  
+  .long-description-content ol,
+  .long-description-content ul {
+    margin-left: 1.5em;
+    margin-bottom: 1em;
+  }
+  
+  .long-description-content li {
+    margin-bottom: 0.5em;
+  }
+  
+  .long-description-content ol {
+    list-style-type: decimal;
+  }
+  
+  .long-description-content ul {
+    list-style-type: disc;
+  }

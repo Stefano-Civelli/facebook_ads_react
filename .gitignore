@@ -38,4 +38,7 @@ next-env.d.ts
 # ignore csv files
 *.csv
 
+# ignore pkl files
+*.pkl
+
 __pycache__/

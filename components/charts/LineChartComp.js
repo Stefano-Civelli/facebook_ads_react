@@ -81,7 +81,7 @@ const LineChartComponent = () => {
               type="monotone"
               dataKey="high_persuasive_impressions"
               stroke={chartColors.chart_color_1}
-              name="Mean Impressions High Persuasive"
+              name="Impressions High Persuasive"
               dot={{ r: 1, strokeWidth: 0 }}
               activeDot={{
                 strokeWidth: 0,
@@ -94,7 +94,7 @@ const LineChartComponent = () => {
               type="monotone"
               dataKey="low_persuasive_impressions"
               stroke={chartColors.chart_color_3}
-              name="Mean Impressions Low Persuasive"
+              name="Impressions Low Persuasive"
               dot={{ r: 1, strokeWidth: 0 }}
               activeDot={{
                 strokeWidth: 0,
@@ -148,7 +148,7 @@ const LineChartComponent = () => {
               type="monotone"
               dataKey="high_persuasive_impressions"
               stroke={chartColors.chart_color_1}
-              name="Mean Impressions High Persuasive"
+              name="Impressions High Persuasive"
               dot={{ r: 1, strokeWidth: 0 }}
               activeDot={{
                 strokeWidth: 0,
@@ -160,7 +160,7 @@ const LineChartComponent = () => {
               type="monotone"
               dataKey="low_persuasive_impressions"
               stroke={chartColors.chart_color_3}
-              name="Mean Impressions Low Persuasive"
+              name="Impressions Low Persuasive"
               dot={{ r: 1, strokeWidth: 0 }}
               activeDot={{
                 strokeWidth: 0,
@@ -216,17 +216,21 @@ const CustomTooltipImpressions = ({ active, payload, label }) => {
 };
 
 const PartySelector = ({ value, onChange }) => {
+  const handleClick = (e) => {
+    e.stopPropagation();
+  };
+
   return (
     <select
       className="select select-xs z-10 bg-gray-800 text-white"
       value={value}
       onChange={onChange}
+      onClick={handleClick}
     >
       <option value="Labor">Labor</option>
       <option value="Liberal">Liberal</option>
       <option value="Greens">Greens</option>
       <option value="Independents">Independents</option>
-      <option value="UAP">United Australia Party</option>
       <option value="All">All</option>
     </select>
   );

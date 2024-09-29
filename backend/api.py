@@ -1,11 +1,11 @@
 import os
 import sys
 
-from util import apply_date_interval, calculate_gender_impressions, clean_string, get_and_validate_dates, get_daily_data
+from util import apply_date_interval, calculate_age_impressions, calculate_gender_impressions, clean_string, get_and_validate_dates, get_daily_data
 print(f'default sys.path: {sys.path}')
 from flask import Flask, jsonify, request
 import pandas as pd
-from data_processing import make_demographics_df, read_data
+from data_processing import make_demographics_df, prepare_data_for_timeseries_api, read_data
 from flask_cors import CORS
 from datetime import datetime
 import config
@@ -23,36 +23,10 @@ CORS(app)
 # Load the CSV data once at startup
 df = read_data(config.file_path, config.default_start_date, config.default_end_date)
 
-print(f'Making demographics df')
 df_demographics = make_demographics_df(df)
-age_order = ['18-24', '25-34', '35-44', '45-54', '55-64', '65+']
-df_demographics['age'] = pd.Categorical(df_demographics['age'], categories=age_order, ordered=True)
-print(f'Demographics df made')
+
 
 # Prepare data to be served --------------------------------------------------------
-
-def prepare_data_for_timeseries_api(df):
-    print('Preparing data for time series API')
-    processed_data = {}
-    
-    # Get unique values of macro_party, including None
-    unique_parties = df['macro_party'].unique()
-    
-    for party in unique_parties:
-        if pd.isna(party): # TODO make sure this works, otherwise put None
-            party_df = df[df['macro_party'].isna()]
-            key = 'None'
-        else:
-            party_df = df[df['macro_party'] == party]
-            key = party
-        
-        daily_data = get_daily_data(party_df)
-        processed_data[key] = daily_data
-    
-    # Add an 'all' key for the entire dataset
-    processed_data['All'] = get_daily_data(df)
-    
-    return processed_data
 
 
 def get_timeseries_data(processed_data, party_str):
@@ -78,9 +52,9 @@ def get_timeseries_data(processed_data, party_str):
     return data
 
 
-#processed_timeseries_daily_data = prepare_data_for_timeseries_api(df) # TODO is there a way to make this faster so I don't need to pre-compute it?
+processed_timeseries_daily_data = prepare_data_for_timeseries_api(df) # TODO is there a way to make this faster so I don't need to pre-compute it?
 
-print('Server ready')
+print('------------------ Server ready ---------------------')
 
 # ---------------------------- API ---------------------------- #
 
@@ -325,7 +299,46 @@ def get_gender_impressions():
             'low_persuasive': calculate_gender_impressions(party_df[party_df['low_persuasive']])
         }
 
-    return jsonify(result)
+    data = {
+        'title': 'Ad Impressions by Gender',
+        'description': 'Total ad impressions by Gender',
+        'data': result
+    }
+
+    return jsonify(data)
+
+@app.route('/api/age-impressions')
+def get_age_impressions():
+    start_date_str = request.args.get('startDate')
+    end_date_str = request.args.get('endDate')
+
+    start_date, end_date, error_response, status_code = get_and_validate_dates(start_date_str, end_date_str)
+    if error_response:
+        return jsonify(error_response), status_code
+
+    filtered_df = df_demographics[
+        (df_demographics['ad_delivery_start_time'] >= start_date) & 
+        (df_demographics['ad_delivery_stop_time'] <= end_date) & 
+        (df_demographics['macro_party'].notnull())
+    ]
+
+    result = {}
+    for party in filtered_df['macro_party'].unique():
+        party_df = filtered_df[filtered_df['macro_party'] == party]
+        
+        result[party] = {
+            'total': calculate_age_impressions(party_df),
+            'high_persuasive': calculate_age_impressions(party_df[party_df['high_persuasive']]),
+            'low_persuasive': calculate_age_impressions(party_df[party_df['low_persuasive']])
+        }
+
+    data = {
+        'title': 'Ad Impressions by Age',
+        'description': 'Total ad impressions by Age',
+        'data': result
+    }
+
+    return jsonify(data)
 
 
 

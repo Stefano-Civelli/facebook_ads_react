@@ -1,5 +1,4 @@
 "use client";
-
 import React from "react";
 import {
   BarChart,
@@ -19,29 +18,46 @@ import CustomLegend from "@/components/CustomLegendComponent";
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
-const BarChartComponent = ({ dataType, title, valuePrefix = "" }) => {
+const DemographicsBarchartComponent = ({ demographicType }) => {
   const { startDate, endDate } = useDateContext();
-  const { data, error, isLoading } = useSWR(
-    `http://127.0.0.1:5000/api/party-${dataType}?startDate=${startDate}&endDate=${endDate}`,
+  const {
+    data: apiResponse,
+    error,
+    isLoading,
+  } = useSWR(
+    `http://127.0.0.1:5000/api/${demographicType}-impressions?startDate=${startDate}&endDate=${endDate}`,
     fetcher
   );
 
   if (error) return <div>failed to load</div>;
   if (isLoading)
     return (
-      <div className="h-[300px] flex items-center">
+      <div className="h-[300px] flex items-center justify-center">
         <span className="loading loading-spinner loading-lg"></span>
       </div>
     );
 
-  const formattedData = Object.entries(data).map(([party, values]) => ({
-    party,
-    low_persuasive: values[`low_persuasive_${dataType}`],
-    high_persuasive: values[`high_persuasive_${dataType}`],
-    total: values[`total_${dataType}`],
-  }));
+  const { data, title } = apiResponse;
 
-  const sortedData = formattedData.sort((a, b) => b.total - a.total);
+  const formattedData = Object.keys(data[Object.keys(data)[0]].total).map(
+    (category) => ({
+      category,
+      ...Object.fromEntries(
+        Object.entries(data).map(([party, values]) => [
+          party,
+          values.total[category],
+        ])
+      ),
+    })
+  );
+
+  // Define the desired order of parties
+  const partyOrder = ["Labor", "Liberal", "Independents", "Greens", "Other"];
+
+  // Filter and sort parties based on the defined order
+  const sortedParties = partyOrder.filter((party) =>
+    data.hasOwnProperty(party)
+  );
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -51,10 +67,7 @@ const BarChartComponent = ({ dataType, title, valuePrefix = "" }) => {
           {payload.map((entry, index) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
               {entry.name}:{" "}
-              <span className="ml-2">
-                {valuePrefix}
-                {formatNumber(entry.value)}
-              </span>
+              <span className="ml-2">{formatNumber(entry.value)}</span>
             </p>
           ))}
         </div>
@@ -71,44 +84,33 @@ const BarChartComponent = ({ dataType, title, valuePrefix = "" }) => {
     >
       <h3 className="text-lg font-semibold text-white mt-5">{title}</h3>
       <BarChart
-        data={sortedData}
         layout="vertical"
+        data={formattedData}
         margin={{
           right: 30,
-          left: 50,
+          left: 20,
           top: 5,
           bottom: 15,
         }}
       >
-        <CartesianGrid strokeDasharray="3" />
+        <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           type="number"
           tickFormatter={(value) => `${(value / 1000000).toFixed(1)}M`}
         />
-        <YAxis dataKey="party" type="category" />
+        <YAxis type="category" dataKey="category" />
         <Tooltip content={<CustomTooltip />} />
         <Legend content={<CustomLegend />} />
-        <Bar
-          dataKey="low_persuasive"
-          stackId="a"
-          fill={chartColors.chart_color_1}
-          name="Low Persuasive"
-        />
-        <Bar
-          dataKey="high_persuasive"
-          stackId="a"
-          fill={chartColors.chart_color_2}
-          name="High Persuasive"
-        />
-        <Bar
-          dataKey="total"
-          stackId="a"
-          fill={chartColors.chart_color_3}
-          name="Total"
-        />
+        {sortedParties.map((party, index) => (
+          <Bar
+            key={party}
+            dataKey={party}
+            fill={chartColors[`chart_color_${(index % 5) + 1}`]}
+          />
+        ))}
       </BarChart>
     </ResponsiveContainer>
   );
 };
 
-export default BarChartComponent;
+export default DemographicsBarchartComponent;

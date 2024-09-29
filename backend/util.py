@@ -71,7 +71,7 @@ def get_daily_data(df):
     expanded_df['low_persuasive_spend'] = expanded_df['mean_spend'] * expanded_df['low_persuasive']
     
     # Aggregate the expanded DataFrame by date
-    daily_data = expanded_df.groupby('date').agg({
+    daily_data = expanded_df.groupby('date', observed=False).agg({
         'mean_impressions': 'sum',
         'high_persuasive_impressions': 'sum',
         'low_persuasive_impressions': 'sum',
@@ -202,11 +202,21 @@ def apply_date_interval(data, start_date, end_date):
     
 
 def calculate_gender_impressions(dataframe):
-    gender_impressions = dataframe.groupby('gender').apply(
+    gender_impressions = dataframe.groupby('gender', observed=False).apply(
         lambda x: (x['mean_impressions'] * x['percentage']).sum()
     ).to_dict()
     
     return {
         'male': round(gender_impressions.get('male', 0)),
         'female': round(gender_impressions.get('female', 0))
+    }
+
+def calculate_age_impressions(dataframe):
+    age_impressions = dataframe.groupby('age', observed=False).apply(
+        lambda x: (x['mean_impressions'] * x['percentage']).sum()
+    ).to_dict()
+    
+    return {
+        age_group: round(impressions)
+        for age_group, impressions in age_impressions.items()
     }
