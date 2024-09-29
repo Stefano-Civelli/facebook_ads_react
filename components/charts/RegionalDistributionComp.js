@@ -146,19 +146,19 @@ const RegionalDistributionComponent = ({
 
               return `
                 <div style="color: white;">
-                  <div style="font-size: ${titleFontSize}; font-weight: bold; margin-bottom: 10px;">
+                  <div style="font-size: ${titleFontSize}; font-weight: bold; margin-bottom: 12px;">
                     ${this.name}
                   </div>
                   <div style="font-size: ${contentFontSize}; line-height: 1.5;">
                     Total Impressions: ${formatNumber(this.value)}<br/>
-                    <span style="color: #51247a;">High Persuasive Impressions: ${formatNumber(
+                    <span style="color: #8f4ecb;">High Persuasive Impressions: ${formatNumber(
                       this.high_persuasive_impressions
                     )}</span><br/>
-                    <span style="color: #3b82f6;">Low Persuasive Impressions: ${formatNumber(
+                    <div style="color: #3b82f6; margin-bottom: 10px;">Low Persuasive Impressions: ${formatNumber(
                       this.low_persuasive_impressions
-                    )}</span><br/>
+                    )}</div>
                     Total Spend: $${formatNumber(this.mean_spend, 2)}<br/>
-                    <span style="color: #51247a;">High Persuasive Spend: $${formatNumber(
+                    <span style="color: #8f4ecb;">High Persuasive Spend: $${formatNumber(
                       this.high_persuasive_spend,
                       2
                     )}</span><br/>
