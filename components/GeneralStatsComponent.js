@@ -5,6 +5,8 @@ import useSWR from "swr";
 import { useDateContext } from "@/context/DateContext";
 import { formatNumber, formatPercentage } from "@/lib/util";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 const StatItem = ({ label, value, subValue }) => (
@@ -18,7 +20,7 @@ const StatItem = ({ label, value, subValue }) => (
 const GeneralStatsComponent = () => {
   const { startDate, endDate } = useDateContext();
   const { data, error, isLoading } = useSWR(
-    `http://127.0.0.1:5000/api/general-stats?startDate=${startDate}&endDate=${endDate}`,
+    `${API_URL}/api/general-stats?startDate=${startDate}&endDate=${endDate}`,
     fetcher
   );
 

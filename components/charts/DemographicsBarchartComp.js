@@ -16,6 +16,8 @@ import { chartColors } from "@/lib/config.js";
 import { formatNumber } from "@/lib/util";
 import CustomLegend from "@/components/CustomLegendComponent";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 const DemographicsBarchartComponent = ({ demographicType }) => {
@@ -25,7 +27,7 @@ const DemographicsBarchartComponent = ({ demographicType }) => {
     error,
     isLoading,
   } = useSWR(
-    `http://127.0.0.1:5000/api/${demographicType}-impressions?startDate=${startDate}&endDate=${endDate}`,
+    `${API_URL}/api/${demographicType}-impressions?startDate=${startDate}&endDate=${endDate}`,
     fetcher
   );
 

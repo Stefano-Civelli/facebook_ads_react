@@ -8,6 +8,8 @@ import { useDateContext } from "@/context/DateContext";
 import { australianRegions } from "@/lib/config";
 import { formatNumber } from "@/lib/util";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 // Initialize highchartsMap
 if (typeof Highcharts === "object") {
   highchartsMap(Highcharts);
@@ -23,7 +25,7 @@ const RegionalDistributionComponent = ({
   const [mapOptions, setMapOptions] = useState({});
   const [title, setTitle] = useState("");
   const { data, error, isLoading } = useSWR(
-    `http://127.0.0.1:5000/api/spend-and-impressions-by-region?startDate=${startDate}&endDate=${endDate}`,
+    `${API_URL}/api/spend-and-impressions-by-region?startDate=${startDate}&endDate=${endDate}`,
     fetcher
   );
 

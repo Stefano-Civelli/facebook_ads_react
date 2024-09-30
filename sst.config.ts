@@ -10,11 +10,15 @@ export default {
   },
   stacks(app) {
     app.stack(function Site({ stack }) {
-      const site = new NextjsSite(stack, "site");
+      const site = new NextjsSite(stack, "site", {
+        environment: {
+          NEXT_PUBLIC_API_URL: process.env.API_URL,
+        },
+      });
 
       stack.addOutputs({
         SiteUrl: site.url,
       });
     });
   },
-} satisfies SSTConfig;
+} satisfies SSTConfig;  

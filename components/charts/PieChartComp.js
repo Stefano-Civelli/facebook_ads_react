@@ -7,13 +7,15 @@ import { useDateContext } from "@/context/DateContext";
 import { chartColors } from "@/lib/config.js";
 import { formatMillions } from "@/lib/util";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 const ImpressionsPieComponent = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const { startDate, endDate } = useDateContext();
   const { data, error, isLoading } = useSWR(
-    `http://127.0.0.1:5000/api/general-stats?startDate=${startDate}&endDate=${endDate}`,
+    `${API_URL}/api/general-stats?startDate=${startDate}&endDate=${endDate}`,
     fetcher
   );
 

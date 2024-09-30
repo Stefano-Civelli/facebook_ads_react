@@ -18,6 +18,8 @@ import { chartColors } from "@/lib/config.js";
 import { formatDate, formatNumber } from "@/lib/util.js";
 import { useState } from "react";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 const LineChartComponent = () => {
@@ -30,7 +32,7 @@ const LineChartComponent = () => {
     error: error1,
     isLoading: isLoading1,
   } = useSWR(
-    `http://127.0.0.1:5000/api/time-series?startDate=${startDate}&endDate=${endDate}&party=${party1}`,
+    `${API_URL}/api/time-series?startDate=${startDate}&endDate=${endDate}&party=${party1}`,
     fetcher
   );
 
@@ -39,7 +41,7 @@ const LineChartComponent = () => {
     error: error2,
     isLoading: isLoading2,
   } = useSWR(
-    `http://127.0.0.1:5000/api/time-series?startDate=${startDate}&endDate=${endDate}&party=${party2}`,
+    `${API_URL}/api/time-series?startDate=${startDate}&endDate=${endDate}&party=${party2}`,
     fetcher
   );
 
