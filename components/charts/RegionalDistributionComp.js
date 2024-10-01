@@ -63,29 +63,6 @@ const RegionalDistributionComponent = ({
             map: mapData,
             backgroundColor: "transparent",
             margin: [10, 10, 10, 10],
-            events: {
-              load: function () {
-                this.renderer
-                  .rect(10, 10, 30, 30)
-                  .attr({
-                    fill: Highcharts.getOptions().colors[0],
-                    stroke: "white",
-                    "stroke-width": 1,
-                  })
-                  .add();
-
-                this.renderer
-                  .text("ACT", 45, 30)
-                  .attr({
-                    zIndex: 5,
-                  })
-                  .css({
-                    color: "#ffffff",
-                    fontSize: "12px",
-                  })
-                  .add();
-              },
-            },
           },
           title: {
             text: undefined,
@@ -134,6 +111,40 @@ const RegionalDistributionComponent = ({
                 enabled: false, // Disable state name labels
               },
             },
+            {
+              type: "mappoint",
+              name: "ACT",
+              data: [
+                {
+                  name: "ACT",
+                  lat: -35.4735,
+                  lon: 149.0124,
+                  z:
+                    data.data["Australian Capital Territory"]
+                      ?.mean_impressions || 0,
+                  high_persuasive_impressions:
+                    data.data["Australian Capital Territory"]
+                      ?.high_persuasive_impressions || 0,
+                  low_persuasive_impressions:
+                    data.data["Australian Capital Territory"]
+                      ?.low_persuasive_impressions || 0,
+                  mean_spend:
+                    data.data["Australian Capital Territory"]?.mean_spend || 0,
+                  high_persuasive_spend:
+                    data.data["Australian Capital Territory"]
+                      ?.high_persuasive_spend || 0,
+                  low_persuasive_spend:
+                    data.data["Australian Capital Territory"]
+                      ?.low_persuasive_spend || 0,
+                },
+              ],
+              color: Highcharts.getOptions().colors[0],
+              marker: {
+                fillColor: Highcharts.getOptions().colors[0],
+                lineWidth: 2,
+                lineColor: "#ffffff",
+              },
+            },
           ],
           tooltip: {
             backgroundColor: "#0f1729",
@@ -143,8 +154,10 @@ const RegionalDistributionComponent = ({
             },
             useHTML: true,
             pointFormatter: function () {
-              const titleFontSize = "18px"; // Adjust this value for the title font size
-              const contentFontSize = "14px"; // Adjust this value for the content font size
+              const titleFontSize = "18px";
+              const contentFontSize = "14px";
+              const impressions =
+                this.value !== undefined ? this.value : this.z;
 
               return `
                 <div style="color: white;">
@@ -152,7 +165,7 @@ const RegionalDistributionComponent = ({
                     ${this.name}
                   </div>
                   <div style="font-size: ${contentFontSize}; line-height: 1.5;">
-                    Total Impressions: ${formatNumber(this.value)}<br/>
+                    Total Impressions: ${formatNumber(impressions)}<br/>
                     <span style="color: #8f4ecb;">High Persuasive Impressions: ${formatNumber(
                       this.high_persuasive_impressions
                     )}</span><br/>
@@ -176,7 +189,6 @@ const RegionalDistributionComponent = ({
         });
       }
     };
-
     fetchMapData();
   }, [data]);
 

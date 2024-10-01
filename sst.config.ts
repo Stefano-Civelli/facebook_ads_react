@@ -1,5 +1,5 @@
 import { SSTConfig } from "sst";
-import { NextjsSite } from "sst/constructs";
+import { NextjsSite, StackContext } from "sst/constructs";
 
 export default {
   config(_input) {
@@ -9,8 +9,9 @@ export default {
     };
   },
   stacks(app) {
-    app.stack(function Site({ stack }) {
+    app.stack(function Site({ stack }: StackContext) {
       const site = new NextjsSite(stack, "site", {
+        path: ".",
         environment: {
           NEXT_PUBLIC_API_URL: process.env.API_URL,
         },
@@ -21,4 +22,4 @@ export default {
       });
     });
   },
-} satisfies SSTConfig;  
+} satisfies SSTConfig;

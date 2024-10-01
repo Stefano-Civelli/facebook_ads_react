@@ -19,9 +19,9 @@ const GridItem = ({
   return (
     <div
       className={cn(
-        "relative flex flex-col items-center justify-center p-4 border border-slate-900 bg-slate-900/50 rounded-xl h-[350px] my-3",
-        "transition-shadow duration-300 ease-in-out",
-        "hover:shadow-[0px_10px_15px_-3px_rgba(255,255,255,0.1),0px_4px_6px_-2px_rgba(255,255,255,0.05)]",
+        "relative flex flex-col items-center justify-center p-4 border border-slate-800 bg-slate-900/50 rounded-xl h-[350px] my-3",
+        "transition-all duration-300 ease-in-out",
+        "hover:scale-[1.01]",
         className
       )}
       onClick={handleClick}

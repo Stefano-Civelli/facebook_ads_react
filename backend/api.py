@@ -126,6 +126,10 @@ def get_basic_stats():
     date_filtered_df = apply_date_interval(df, start_date, end_date)
     date_filtered_high_persuasive = date_filtered_df[date_filtered_df['high_persuasive']]
     date_filtered_low_persuasive = date_filtered_df[date_filtered_df['low_persuasive']]
+    date_filtered_medium_persuasive = date_filtered_df[date_filtered_df['medium_persuasive']]
+
+    def safe_divide(numerator, denominator, multiplier=1):
+        return (numerator / denominator * multiplier) if denominator != 0 else 0
 
     data = {
         'title': 'General Stats',
@@ -134,27 +138,27 @@ def get_basic_stats():
             'total_spend': date_filtered_df['mean_spend'].sum(),
             'total_spend_high_persuasive': date_filtered_high_persuasive['mean_spend'].sum(),
             'total_spend_low_persuasive': date_filtered_low_persuasive['mean_spend'].sum(),
-            'total_spend_other': date_filtered_df[date_filtered_df['medium_persuasive']]['mean_spend'].sum(),
+            'total_spend_other': date_filtered_medium_persuasive['mean_spend'].sum(),
             'total_impressions': date_filtered_df['mean_impressions'].sum(),
             'total_impressions_high_persuasive': date_filtered_high_persuasive['mean_impressions'].sum(),
             'total_impressions_low_persuasive': date_filtered_low_persuasive['mean_impressions'].sum(),
-            'total_impressions_other': date_filtered_df[date_filtered_df['medium_persuasive']]['mean_impressions'].sum(),
+            'total_impressions_other': date_filtered_medium_persuasive['mean_impressions'].sum(),
             'total_ads': date_filtered_df.shape[0],
             'total_high_persuasive_ads': date_filtered_high_persuasive.shape[0],
             'total_low_persuasive_ads': date_filtered_low_persuasive.shape[0],
-            'total_other_ads': date_filtered_df[date_filtered_df['medium_persuasive']].shape[0],
-            'cost_per_thousand_impressions': date_filtered_df['mean_spend'].sum() / date_filtered_df['mean_impressions'].sum() * 1000,
-            'cost_per_thousand_impressions_high_persuasive': date_filtered_high_persuasive['mean_spend'].sum() / date_filtered_high_persuasive['mean_impressions'].sum() * 1000,
-            'cost_per_thousand_impressions_low_persuasive': date_filtered_low_persuasive['mean_spend'].sum() / date_filtered_low_persuasive['mean_impressions'].sum() * 1000,
-            'cost_per_thousand_impressions_other': date_filtered_df[date_filtered_df['medium_persuasive']]['mean_spend'].sum() / date_filtered_df[date_filtered_df['medium_persuasive']]['mean_impressions'].sum() * 1000,
+            'total_other_ads': date_filtered_medium_persuasive.shape[0],
+            'cost_per_thousand_impressions': safe_divide(date_filtered_df['mean_spend'].sum(), date_filtered_df['mean_impressions'].sum(), 1000),
+            'cost_per_thousand_impressions_high_persuasive': safe_divide(date_filtered_high_persuasive['mean_spend'].sum(), date_filtered_high_persuasive['mean_impressions'].sum(), 1000),
+            'cost_per_thousand_impressions_low_persuasive': safe_divide(date_filtered_low_persuasive['mean_spend'].sum(), date_filtered_low_persuasive['mean_impressions'].sum(), 1000),
+            'cost_per_thousand_impressions_other': safe_divide(date_filtered_medium_persuasive['mean_spend'].sum(), date_filtered_medium_persuasive['mean_impressions'].sum(), 1000),
             'average_spend_per_ad': date_filtered_df['mean_spend'].mean(),
             'average_impressions_per_ad': date_filtered_df['mean_impressions'].mean(),
             'total_number_of_unique_funding_entities': date_filtered_df['funding_entity'].nunique(),
-            'proportion_high_persuasive': date_filtered_high_persuasive.shape[0] / date_filtered_df.shape[0], # makes sene only when df is the main df
-            'proportion_low_persuasive': date_filtered_low_persuasive.shape[0] / date_filtered_df.shape[0], # makes sene only when df is the main df
-            'proportion_other': date_filtered_df[date_filtered_df['medium_persuasive']].shape[0] / date_filtered_df.shape[0], # makes sene only when df is the main df
-            'percentage_ads_persuasive_ration_gt_0': date_filtered_df[date_filtered_df['persuasive_ratio'] > 0].shape[0] / date_filtered_df.shape[0], # makes sene only when df is the main df
-            'avg_campaign_duration': (date_filtered_df['ad_delivery_stop_time'] - date_filtered_df['ad_delivery_start_time']).mean().days, # TODO check if makes sense
+            'proportion_high_persuasive': safe_divide(date_filtered_high_persuasive.shape[0], date_filtered_df.shape[0]),
+            'proportion_low_persuasive': safe_divide(date_filtered_low_persuasive.shape[0], date_filtered_df.shape[0]),
+            'proportion_other': safe_divide(date_filtered_medium_persuasive.shape[0], date_filtered_df.shape[0]),
+            'percentage_ads_persuasive_ratio_gt_0': safe_divide(date_filtered_df[date_filtered_df['persuasive_ratio'] > 0].shape[0], date_filtered_df.shape[0]),
+            'avg_campaign_duration': (date_filtered_df['ad_delivery_stop_time'] - date_filtered_df['ad_delivery_start_time']).mean().days,
             'avg_campaign_duration_high_persuasive': (date_filtered_high_persuasive['ad_delivery_stop_time'] - date_filtered_high_persuasive['ad_delivery_start_time']).mean().days
         }
     }

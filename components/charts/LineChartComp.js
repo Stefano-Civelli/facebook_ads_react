@@ -90,6 +90,7 @@ const LineChartComponent = () => {
                 fill: "white",
                 r: 3,
               }}
+              strokeWidth={1.7}
             />
 
             <Line
@@ -103,6 +104,7 @@ const LineChartComponent = () => {
                 fill: "white",
                 r: 3,
               }}
+              strokeWidth={1.7}
             />
 
             <ReferenceLine
@@ -157,6 +159,7 @@ const LineChartComponent = () => {
                 fill: "white",
                 r: 3,
               }}
+              strokeWidth={1.7}
             />
             <Line
               type="monotone"
@@ -169,6 +172,7 @@ const LineChartComponent = () => {
                 fill: "white",
                 r: 3,
               }}
+              strokeWidth={1.7}
             />
             <ReferenceLine x="2022-05-21" stroke="red" strokeDasharray="3 3" />
             <ReferenceLine
