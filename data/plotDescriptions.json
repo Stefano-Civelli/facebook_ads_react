@@ -8,11 +8,11 @@
       "blurText": "<div class=\"long-description-content\"><p>This plot presents two time series, each showing the daily impressions of high and low persuasive ads for a selected political party.</p><p><strong>Key features of the plot:</strong></p><ol><li>Two separate time series: Users can select different political parties for each series, enabling direct comparisons.</li><li>High and low persuasive ads: Each time series distinguishes between high and low persuasive ad impressions, offering insights into the effectiveness of different ad types.</li><li>Daily data with smoothing: The plot shows daily data points, with a 3-day moving average applied to smooth out short-term fluctuations and highlight longer-term trends.</li><li>Impressions metric: The y-axis represents the number of ad impressions, indicating the reach of the political ads.</li></ol><p><strong>Data processing details:</strong></p><ul><li>The data is aggregated daily for each political party.</li><li>High and low persuasive impressions are calculated based on a persuasiveness score assigned to each ad.</li><li>A 3-day moving average is applied to all metrics to reduce noise and improve trend visibility.</li><li>The plot allows for the selection of specific parties, including an \"All\" option that shows data for the entire dataset.</li></ul><p>To interpret the graph, look for spikes in impressions, which may indicate increased ad activity during key political events and the differences in the ratio of high to low persuasive ad impressions between parties</p><p><strong>Note:</strong> This data represents impressions, not unique viewers. A single person may see multiple ads, contributing to multiple impressions.</p></div>"
     },
     "spendBarChart": {
-      "infoContent": "Lorem ipsum doloret Lorem ipsum doloret Lorem ipsum doloret Lorem ipsum doloret Lorem ipsum doloret",
+      "infoContent": "NOTE: Ads that are not associated to any party do not appear in this plot. With 'others' we refer to ads that are not associated to any of the main political parties. but for which a party is available in the dataset.",
       "blurText": "Placeholder for Party Spend Breakdown blur text"
     },
     "impressionsBarChart": {
-      "infoContent": "Placeholder for Party Impressions Breakdown info",
+      "infoContent": "NOTE: Ads that are not associated to any party do not appear in this plot. With 'others' we refer to ads that are not associated to any of the main political parties. but for which a party is available in the dataset.",
       "blurText": "Placeholder for Party Impressions Breakdown blur text"
     },
     "pieChart": {

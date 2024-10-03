@@ -12,9 +12,9 @@ import {
 } from "recharts";
 import useSWR from "swr";
 import { useDateContext } from "../../context/DateContext";
-import { chartColors } from "@/lib/config.js";
+import { usePartyContext } from "@/context/PartyContext";
 import { formatNumber } from "@/lib/util";
-import CustomLegend from "@/components/CustomLegendComponent";
+import { shortNameParties } from "@/lib/config";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -22,12 +22,14 @@ const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 const DemographicsBarchartComponent = ({ demographicType }) => {
   const { startDate, endDate } = useDateContext();
+  const { selectedParties } = usePartyContext();
+
   const {
     data: apiResponse,
     error,
     isLoading,
   } = useSWR(
-    `${API_URL}/api/${demographicType}-impressions?startDate=${startDate}&endDate=${endDate}`,
+    `${API_URL}/api/${demographicType}-impressions?startDate=${startDate}&endDate=${endDate}&parties=${selectedParties}`,
     fetcher
   );
 
@@ -44,38 +46,116 @@ const DemographicsBarchartComponent = ({ demographicType }) => {
   const formattedData = Object.keys(data[Object.keys(data)[0]].total).map(
     (category) => ({
       category,
-      ...Object.fromEntries(
-        Object.entries(data).map(([party, values]) => [
-          party,
-          values.total[category],
+      ...Object.entries(data)
+        .flatMap(([party, values]) => [
+          [`${party}_total`, values.total[category]],
+          [`${party}_high`, values.high_persuasive[category]],
+          [`${party}_low`, values.low_persuasive[category]],
         ])
-      ),
+        .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {}),
     })
   );
 
-  // Define the desired order of parties
-  const partyOrder = ["Labor", "Liberal", "Independents", "Greens", "Other"];
-
-  // Filter and sort parties based on the defined order
-  const sortedParties = partyOrder.filter((party) =>
-    data.hasOwnProperty(party)
-  );
+  const sortedParties = shortNameParties
+    .map((party) => party.name)
+    .filter((party) => data.hasOwnProperty(party));
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
+      const groupedPayload = payload.reduce((acc, entry) => {
+        const [party, type] = entry.dataKey.split("_");
+        if (!acc[party]) {
+          acc[party] = {};
+        }
+        acc[party][type] = entry.value;
+        return acc;
+      }, {});
+
+      const parties = Object.entries(groupedPayload);
+      const rows = [];
+      for (let i = 0; i < parties.length; i += 2) {
+        rows.push(parties.slice(i, i + 2));
+      }
+
       return (
         <div className="p-4 bg-slate-900 flex flex-col gap-4 rounded-md">
           <p className="text-medium text-lg">{label}</p>
-          {payload.map((entry, index) => (
-            <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {entry.name}:{" "}
-              <span className="ml-2">{formatNumber(entry.value)}</span>
-            </p>
+          {rows.map((row, rowIndex) => (
+            <div key={rowIndex} className="flex gap-4">
+              {row.map(([party, values]) => (
+                <div
+                  key={party}
+                  className="flex-1"
+                  style={{
+                    color: shortNameParties.find((p) => p.name === party).color,
+                  }}
+                >
+                  <p className="font-bold">{party}</p>
+                  <p className="text-sm">Total: {formatNumber(values.total)}</p>
+                  <p className="text-sm">
+                    High Persuasive: {formatNumber(values.high)}
+                  </p>
+                  <p className="text-sm">
+                    Low Persuasive: {formatNumber(values.low)}
+                  </p>
+                </div>
+              ))}
+            </div>
           ))}
         </div>
       );
     }
     return null;
+  };
+
+  const CustomLegend = (props) => {
+    const { payload } = props;
+    const uniqueParties = [
+      ...new Set(payload.map((entry) => entry.dataKey.split("_")[0])),
+    ];
+
+    return (
+      <div className="flex flex-col items-center mt-4">
+        <div className="flex flex-wrap justify-center gap-4 mb-2">
+          {uniqueParties.map((party) => {
+            const color = shortNameParties.find((p) => p.name === party).color;
+            return (
+              <div key={party} className="flex items-center">
+                <div
+                  style={{
+                    width: 20,
+                    height: 20,
+                    backgroundColor: color,
+                    marginRight: 5,
+                  }}
+                />
+                <span>{party}</span>
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex gap-4 mt-2">
+          <div className="flex items-center">
+            <svg width="20" height="20" style={{ marginRight: 5 }}>
+              <rect width="20" height="20" fill="url(#legend-dots)" />
+            </svg>
+            <span>Low Persuasive</span>
+          </div>
+          <div className="flex items-center">
+            <svg width="20" height="20" style={{ marginRight: 5 }}>
+              <rect width="20" height="20" fill="url(#legend-stripes)" />
+            </svg>
+            <span>High Persuasive</span>
+          </div>
+          <div className="flex items-center">
+            <svg width="20" height="20" style={{ marginRight: 5 }}>
+              <rect width="20" height="20" fill="#888" />
+            </svg>
+            <span>Total</span>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -95,21 +175,83 @@ const DemographicsBarchartComponent = ({ demographicType }) => {
           bottom: 15,
         }}
       >
-        <CartesianGrid strokeDasharray="3 3" />
+        <defs>
+          {sortedParties.map((party) => {
+            const color = shortNameParties.find((p) => p.name === party).color;
+            return (
+              <React.Fragment key={party}>
+                <pattern
+                  id={`${party}-stripes`}
+                  patternUnits="userSpaceOnUse"
+                  width="4"
+                  height="4"
+                  patternTransform="rotate(45)"
+                >
+                  <line
+                    x1="0"
+                    y="0"
+                    x2="0"
+                    y2="4"
+                    stroke={color}
+                    strokeWidth="2"
+                  />
+                </pattern>
+                <pattern
+                  id={`${party}-dots`}
+                  patternUnits="userSpaceOnUse"
+                  width="3"
+                  height="3"
+                >
+                  <circle cx="1.5" cy="1.5" r="0.5" fill={color} />
+                </pattern>
+              </React.Fragment>
+            );
+          })}
+          <pattern
+            id="legend-stripes"
+            patternUnits="userSpaceOnUse"
+            width="4"
+            height="4"
+            patternTransform="rotate(45)"
+          >
+            <line x1="0" y="0" x2="0" y2="4" stroke="#888" strokeWidth="2" />
+          </pattern>
+          <pattern
+            id="legend-dots"
+            patternUnits="userSpaceOnUse"
+            width="3"
+            height="3"
+          >
+            <circle cx="1.5" cy="1.5" r="0.5" fill="#888" />
+          </pattern>
+        </defs>
+        <CartesianGrid strokeDasharray="3 3" stroke="#555555" />
         <XAxis
           type="number"
           tickFormatter={(value) => `${(value / 1000000).toFixed(1)}M`}
+          tick={{ fill: "#999" }}
         />
-        <YAxis type="category" dataKey="category" />
+        <YAxis type="category" dataKey="category" tick={{ fill: "#999" }} />
         <Tooltip content={<CustomTooltip />} />
         <Legend content={<CustomLegend />} />
-        {sortedParties.map((party, index) => (
-          <Bar
-            key={party}
-            dataKey={party}
-            fill={chartColors[`chart_color_${(index % 5) + 1}`]}
-          />
-        ))}
+        {sortedParties.map((party) => {
+          const color = shortNameParties.find((p) => p.name === party).color;
+          return (
+            <React.Fragment key={party}>
+              <Bar
+                dataKey={`${party}_low`}
+                stackId={party}
+                fill={`url(#${party}-dots)`}
+              />
+              <Bar
+                dataKey={`${party}_high`}
+                stackId={party}
+                fill={`url(#${party}-stripes)`}
+              />
+              <Bar dataKey={`${party}_total`} stackId={party} fill={color} />
+            </React.Fragment>
+          );
+        })}
       </BarChart>
     </ResponsiveContainer>
   );

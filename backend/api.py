@@ -117,13 +117,21 @@ def get_party_impressions():
 def get_basic_stats():
     start_date_str = request.args.get('startDate')
     end_date_str = request.args.get('endDate')
-
+    parties_param = request.args.get('parties', '')
+    parties = parties_param.split(',') if parties_param else []    
+  
     start_date, end_date, error_response, status_code = get_and_validate_dates(start_date_str, end_date_str)
 
     if error_response:
         return jsonify(error_response), status_code
     
     date_filtered_df = apply_date_interval(df, start_date, end_date)
+
+    
+    if parties:
+        filtered_parties = [config.party_mapping.get(party) for party in parties]
+        date_filtered_df = date_filtered_df[date_filtered_df['macro_party'].isin(filtered_parties)]
+
     date_filtered_high_persuasive = date_filtered_df[date_filtered_df['high_persuasive']]
     date_filtered_low_persuasive = date_filtered_df[date_filtered_df['low_persuasive']]
     date_filtered_medium_persuasive = date_filtered_df[date_filtered_df['medium_persuasive']]
@@ -133,7 +141,7 @@ def get_basic_stats():
 
     data = {
         'title': 'General Stats',
-        'description': 'General statistics',
+        'description': 'General statistics for ' + ('all parties' if not parties else 'selected parties'),
         'data': {
             'total_spend': date_filtered_df['mean_spend'].sum(),
             'total_spend_high_persuasive': date_filtered_high_persuasive['mean_spend'].sum(),
@@ -169,6 +177,8 @@ def get_basic_stats():
 def get_spend_and_impressions_by_region():
     start_date_str = request.args.get('startDate')
     end_date_str = request.args.get('endDate')
+    parties_param = request.args.get('parties', '')
+    parties = parties_param.split(',') if parties_param else []
 
     start_date, end_date, error_response, status_code = get_and_validate_dates(start_date_str, end_date_str)
     if error_response:
@@ -177,7 +187,11 @@ def get_spend_and_impressions_by_region():
     # Filter the dataframe based on date range
     filtered_df = df[(df['ad_delivery_start_time'] >= start_date) & 
                      (df['ad_delivery_stop_time'] <= end_date)]
-    
+
+    if parties:
+        filtered_parties = [config.party_mapping.get(party) for party in parties]
+        filtered_df = filtered_df[filtered_df['macro_party'].isin(filtered_parties)]
+
 
     def process_data(data_df):
         rows = []
@@ -218,7 +232,7 @@ def get_spend_and_impressions_by_region():
     # Prepare the response data
     data = {
         'title': 'Regional Spend and Impressions',
-        'description': 'Spend and impressions by region for high persuasive, low persuasive, and all ads',
+        'description': f'Spend and impressions by region for high persuasive, low persuasive, and all ads',
         'data': structured_data
     }
 
@@ -282,8 +296,11 @@ def get_spend_and_impressions_by_region():
 def get_gender_impressions():
     start_date_str = request.args.get('startDate')
     end_date_str = request.args.get('endDate')
+    parties_param = request.args.get('parties', '')
+    parties = parties_param.split(',') if parties_param else []
 
     start_date, end_date, error_response, status_code = get_and_validate_dates(start_date_str, end_date_str)
+    
     if error_response:
         return jsonify(error_response), status_code
 
@@ -292,6 +309,10 @@ def get_gender_impressions():
         (df_demographics['ad_delivery_stop_time'] <= end_date) & 
         (df_demographics['macro_party'].notnull())
     ]
+
+    if parties:
+        filtered_parties = [config.party_mapping.get(party) for party in parties]
+        filtered_df = filtered_df[filtered_df['macro_party'].isin(filtered_parties)]
 
     result = {}
     for party in filtered_df['macro_party'].unique():
@@ -315,8 +336,11 @@ def get_gender_impressions():
 def get_age_impressions():
     start_date_str = request.args.get('startDate')
     end_date_str = request.args.get('endDate')
+    parties_param = request.args.get('parties', '')
+    parties = parties_param.split(',') if parties_param else []
 
     start_date, end_date, error_response, status_code = get_and_validate_dates(start_date_str, end_date_str)
+    
     if error_response:
         return jsonify(error_response), status_code
 
@@ -325,6 +349,10 @@ def get_age_impressions():
         (df_demographics['ad_delivery_stop_time'] <= end_date) & 
         (df_demographics['macro_party'].notnull())
     ]
+
+    if parties:
+        filtered_parties = [config.party_mapping.get(party) for party in parties]
+        filtered_df = filtered_df[filtered_df['macro_party'].isin(filtered_parties)]
 
     result = {}
     for party in filtered_df['macro_party'].unique():

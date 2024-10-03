@@ -14,7 +14,7 @@ import {
 import useSWR from "swr";
 import { useDateContext } from "../../context/DateContext";
 import { chartColors } from "@/lib/config.js";
-import { formatNumber } from "@/lib/util";
+import { formatNumber, cleanString } from "@/lib/util";
 import CustomLegend from "@/components/CustomLegendComponent";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
@@ -37,7 +37,7 @@ const BarChartComponent = ({ dataType, title, valuePrefix = "" }) => {
     );
 
   const formattedData = Object.entries(data).map(([party, values]) => ({
-    party,
+    party: cleanString(party),
     low_persuasive: values[`low_persuasive_${dataType}`],
     high_persuasive: values[`high_persuasive_${dataType}`],
     total: values[`total_${dataType}`],
@@ -82,30 +82,31 @@ const BarChartComponent = ({ dataType, title, valuePrefix = "" }) => {
           bottom: 15,
         }}
       >
-        <CartesianGrid strokeDasharray="3" />
+        <CartesianGrid strokeDasharray="3" stroke="#555555" />
         <XAxis
           type="number"
           tickFormatter={(value) => `${(value / 1000000).toFixed(1)}M`}
+          tick={{ fill: "#999" }}
         />
-        <YAxis dataKey="party" type="category" />
+        <YAxis dataKey="party" type="category" tick={{ fill: "#999" }} />
         <Tooltip content={<CustomTooltip />} />
         <Legend content={<CustomLegend />} />
         <Bar
           dataKey="low_persuasive"
           stackId="a"
-          fill={chartColors.chart_color_1}
+          fill={chartColors.chart_color_3}
           name="Low Persuasive"
         />
         <Bar
           dataKey="high_persuasive"
           stackId="a"
-          fill={chartColors.chart_color_2}
+          fill={chartColors.chart_color_1}
           name="High Persuasive"
         />
         <Bar
           dataKey="total"
           stackId="a"
-          fill={chartColors.chart_color_3}
+          fill={chartColors.chart_color_2}
           name="Total"
         />
       </BarChart>

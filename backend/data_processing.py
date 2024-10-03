@@ -81,30 +81,30 @@ def make_demographics_df(df, force_reprocess=False, cache_file='data/demographic
     return df_demographics
 
 
-def prepare_data_for_timeseries_api(df):
-    print('Preparing data for time series API')
-    processed_data = {}
+# def prepare_data_for_timeseries_api(df):
+#     print('Preparing data for time series API')
+#     processed_data = {}
     
-    # Get unique values of macro_party, including None
-    unique_parties = df['macro_party'].unique()
+#     # Get unique values of macro_party, including None
+#     unique_parties = df['macro_party'].unique()
     
-    for party in unique_parties:
-        if pd.isna(party): # TODO make sure this works, otherwise put None
-            party_df = df[df['macro_party'].isna()]
-            key = 'None'
-        else:
-            party_df = df[df['macro_party'] == party]
-            key = party
+#     for party in unique_parties:
+#         if pd.isna(party): # TODO make sure this works, otherwise put None
+#             party_df = df[df['macro_party'].isna()]
+#             key = 'No_Affiliation'
+#         else:
+#             party_df = df[df['macro_party'] == party]
+#             key = party
         
-        daily_data = get_daily_data(party_df)
-        processed_data[key] = daily_data
+#         daily_data = get_daily_data(party_df)
+#         processed_data[key] = daily_data
     
-    # Add an 'all' key for the entire dataset
-    processed_data['All'] = get_daily_data(df)
+#     # Add an 'all' key for the entire dataset
+#     processed_data['All'] = get_daily_data(df)
 
-    print('Data is ready for time series API')
+#     print('Data is ready for time series API')
     
-    return processed_data
+#     return processed_data
 
 
 def prepare_data_for_timeseries_api(df, force_reprocess=False, cache_file='data/timeseries_data_cache.pkl'):
@@ -122,7 +122,7 @@ def prepare_data_for_timeseries_api(df, force_reprocess=False, cache_file='data/
     for party in unique_parties:
         if pd.isna(party):
             party_df = df[df['macro_party'].isna()]
-            key = 'None'
+            key = 'No_Affiliation'
         else:
             party_df = df[df['macro_party'] == party]
             key = party

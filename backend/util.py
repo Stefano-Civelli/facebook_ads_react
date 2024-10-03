@@ -28,7 +28,7 @@ def assign_macro_party(row):
     keeps null values as is, and assigns main parties as before.
     """
     if pd.isnull(row['party']):
-        return None
+        return 'No_Affiliation'
     elif row['party'] in ['Liberal', 'Liberal Nationals (QLD)', 'Nationals', 'Country Liberal (NT)', 'New Liberals']:
         return 'Liberal'
     elif row['party'] == 'Labor':

@@ -17,6 +17,7 @@ import { useDateContext } from "../../context/DateContext";
 import { chartColors } from "@/lib/config.js";
 import { formatDate, formatNumber } from "@/lib/util.js";
 import { useState } from "react";
+import { PartySelector } from "../ui/partySelector";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -74,8 +75,15 @@ const LineChartComponent = () => {
             }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#555555" />
-            <XAxis dataKey="date" tickFormatter={formatDate} />
-            <YAxis tickFormatter={(x) => `${x / 1000000}M`} />
+            <XAxis
+              dataKey="date"
+              tickFormatter={formatDate}
+              tick={{ fill: "#999" }}
+            />
+            <YAxis
+              tickFormatter={(x) => `${x / 1000000}M`}
+              tick={{ fill: "#999" }}
+            />
 
             <Tooltip content={<CustomTooltipImpressions />} />
             <Legend />
@@ -83,7 +91,7 @@ const LineChartComponent = () => {
               type="monotone"
               dataKey="high_persuasive_impressions"
               stroke={chartColors.chart_color_1}
-              name="Impressions High Persuasive"
+              name="High Persuasive Impressions"
               dot={{ r: 1, strokeWidth: 0 }}
               activeDot={{
                 strokeWidth: 0,
@@ -97,7 +105,7 @@ const LineChartComponent = () => {
               type="monotone"
               dataKey="low_persuasive_impressions"
               stroke={chartColors.chart_color_3}
-              name="Impressions Low Persuasive"
+              name="Low Persuasive Impressions"
               dot={{ r: 1, strokeWidth: 0 }}
               activeDot={{
                 strokeWidth: 0,
@@ -144,15 +152,22 @@ const LineChartComponent = () => {
             margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#555555" />
-            <XAxis dataKey="date" tickFormatter={formatDate} />
-            <YAxis tickFormatter={(x) => `${x / 1000000}M`} />
+            <XAxis
+              dataKey="date"
+              tickFormatter={formatDate}
+              tick={{ fill: "#999" }}
+            />
+            <YAxis
+              tickFormatter={(x) => `${x / 1000000}M`}
+              tick={{ fill: "#999" }}
+            />
             <Tooltip content={<CustomTooltipImpressions />} />
             <Legend />
             <Line
               type="monotone"
               dataKey="high_persuasive_impressions"
               stroke={chartColors.chart_color_1}
-              name="Impressions High Persuasive"
+              name="High Persuasive Impressions"
               dot={{ r: 1, strokeWidth: 0 }}
               activeDot={{
                 strokeWidth: 0,
@@ -165,7 +180,7 @@ const LineChartComponent = () => {
               type="monotone"
               dataKey="low_persuasive_impressions"
               stroke={chartColors.chart_color_3}
-              name="Impressions Low Persuasive"
+              name="Low Persuasive Impressions"
               dot={{ r: 1, strokeWidth: 0 }}
               activeDot={{
                 strokeWidth: 0,
@@ -219,25 +234,4 @@ const CustomTooltipImpressions = ({ active, payload, label }) => {
       </div>
     );
   }
-};
-
-const PartySelector = ({ value, onChange }) => {
-  const handleClick = (e) => {
-    e.stopPropagation();
-  };
-
-  return (
-    <select
-      className="select select-xs z-10 bg-gray-800 text-white"
-      value={value}
-      onChange={onChange}
-      onClick={handleClick}
-    >
-      <option value="Labor">Labor</option>
-      <option value="Liberal">Liberal</option>
-      <option value="Greens">Greens</option>
-      <option value="Independents">Independents</option>
-      <option value="All">All</option>
-    </select>
-  );
 };

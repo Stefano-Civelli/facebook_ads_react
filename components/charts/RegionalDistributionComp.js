@@ -1,10 +1,12 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import highchartsMap from "highcharts/modules/map";
 import useSWR from "swr";
 import { useDateContext } from "@/context/DateContext";
+import { usePartyContext } from "@/context/PartyContext";
 import { australianRegions } from "@/lib/config";
 import { formatNumber } from "@/lib/util";
 
@@ -24,8 +26,10 @@ const RegionalDistributionComponent = ({
   const { startDate, endDate } = useDateContext();
   const [mapOptions, setMapOptions] = useState({});
   const [title, setTitle] = useState("");
+  const { selectedParties } = usePartyContext();
+
   const { data, error, isLoading } = useSWR(
-    `${API_URL}/api/spend-and-impressions-by-region?startDate=${startDate}&endDate=${endDate}`,
+    `${API_URL}/api/spend-and-impressions-by-region?startDate=${startDate}&endDate=${endDate}&parties=${selectedParties}`,
     fetcher
   );
 

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { PieChart, Pie, Sector, ResponsiveContainer, Cell } from "recharts";
 import useSWR from "swr";
 import { useDateContext } from "@/context/DateContext";
+import { usePartyContext } from "@/context/PartyContext";
 import { chartColors } from "@/lib/config.js";
 import { formatMillions } from "@/lib/util";
 
@@ -14,8 +15,10 @@ const fetcher = (...args) => fetch(...args).then((res) => res.json());
 const ImpressionsPieComponent = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const { startDate, endDate } = useDateContext();
+  const { selectedParties } = usePartyContext();
+
   const { data, error, isLoading } = useSWR(
-    `${API_URL}/api/general-stats?startDate=${startDate}&endDate=${endDate}`,
+    `${API_URL}/api/general-stats?startDate=${startDate}&endDate=${endDate}&parties=${selectedParties}`,
     fetcher
   );
 
@@ -29,7 +32,7 @@ const ImpressionsPieComponent = () => {
 
   const pieData = [
     {
-      name: "All Impressions",
+      name: "Other Impressions",
       value: data.data.total_impressions_other,
       spend: data.data.total_spend_other,
       cpti: data.data.cost_per_thousand_impressions_other,
@@ -162,6 +165,7 @@ const ImpressionsPieComponent = () => {
       <h3 className="text-lg font-semibold text-white text-center mb-4">
         Impressions Distribution
       </h3>
+
       <PieChart className="-mt-11">
         <Pie
           activeIndex={activeIndex}
@@ -181,9 +185,9 @@ const ImpressionsPieComponent = () => {
         </Pie>
       </PieChart>
 
-      <text className="absolute bottom-2 right-2" fontSize="6">
+      <p className="absolute bottom-2 right-2 ">
         *CPTI: Cost Per Thousand Impressions
-      </text>
+      </p>
     </ResponsiveContainer>
   );
 };

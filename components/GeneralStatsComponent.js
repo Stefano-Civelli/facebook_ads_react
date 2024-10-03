@@ -10,10 +10,12 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 const StatItem = ({ label, value, subValue }) => (
-  <div className="flex flex-col items-center justify-center p-2 text-center">
-    <h4 className="text-sm font-semibold text-gray-300">{label}</h4>
-    <p className="text-lg font-bold text-blue-400">{value}</p>
-    {subValue && <p className="text-xs text-gray-400">{subValue}</p>}
+  <div className="flex flex-col items-center justify-center p-2 text-center h-full">
+    <h4 className="text-sm font-semibold text-gray-300 mb-1">{label}</h4>
+    <div className="flex-grow flex flex-col items-center justify-center">
+      <p className="text-lg font-bold text-blue-400">{value}</p>
+      {subValue && <p className="text-xs text-gray-400 mt-1">{subValue}</p>}
+    </div>
   </div>
 );
 
@@ -35,7 +37,7 @@ const GeneralStatsComponent = () => {
   const stats = data.data;
 
   return (
-    <div className="grid grid-cols-3 md:grid-cols-6 gap-2 h-full -mt-2">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 h-full -mt-4">
       <StatItem
         label="Total Ads"
         value={stats.total_ads.toLocaleString()}
