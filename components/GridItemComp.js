@@ -19,7 +19,7 @@ const GridItem = ({
   return (
     <div
       className={cn(
-        "relative flex flex-col items-center justify-center p-4 border border-slate-800 bg-slate-900/50 rounded-xl h-[350px] my-4",
+        "relative flex flex-col items-center justify-center p-4 border border-slate-800 dark:bg-slate-900/50 bg-white rounded-xl h-[350px] my-4",
         "transition-all duration-300 ease-in-out",
         "hover:scale-[1.01]",
         className

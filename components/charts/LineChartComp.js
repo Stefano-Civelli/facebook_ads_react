@@ -204,22 +204,6 @@ const LineChartComponent = () => {
 
 export default LineChartComponent;
 
-// const CustomTooltipSpend = ({ active, payload, label }) => {
-//   if (active && payload && payload.length) {
-//     return (
-//       <div className="p-4 bg-slate-900 flex flex-col gap-4 rounded-md">
-//         <p className="text-medium text-lg">{formatDate(label)}</p>
-//         <p className="text-sm" style={{ color: payload[0].stroke }}>
-//           <span className="ml-2">${formatNumber(payload[0].value)}</span>
-//         </p>
-//         <p className="text-sm" style={{ color: payload[1].stroke }}>
-//           <span className="ml-2">${formatNumber(payload[1].value)}</span>
-//         </p>
-//       </div>
-//     );
-//   }
-// };
-
 const CustomTooltipImpressions = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (

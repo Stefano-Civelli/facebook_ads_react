@@ -109,7 +109,7 @@ const Sidebar = () => {
         updateSelectedParties={updateSelectedParties}
       />
 
-      <div className="my-6">
+      {/* <div className="my-6">
         <button
           className="flex items-center text-sm text-blue-400 hover:text-blue-300 transition-colors duration-200"
           onClick={() => setShowInfo(!showInfo)}
@@ -129,7 +129,7 @@ const Sidebar = () => {
             Explore party-wise data and trends leading up to the election day.
           </div>
         )}
-      </div>
+      </div> */}
 
       <div className="mt-6 p-3 bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-lg">
         <h3 className="font-semibold mb-2 flex items-center">

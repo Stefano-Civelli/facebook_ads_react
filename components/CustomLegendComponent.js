@@ -7,7 +7,7 @@ const CustomLegend = (props) => {
   return (
     <ul className="flex justify-center gap-3">
       {payload.map((entry, index) => (
-        <li key={`item-${index}`} className="flex items-center">
+        <li key={`item-${index}`} className="flex items-center text-black">
           <span
             className="inline-block w-3 h-3 mr-2"
             style={{ backgroundColor: entry.color }}

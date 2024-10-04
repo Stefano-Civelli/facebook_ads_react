@@ -7,7 +7,7 @@ const quicksand = Quicksand({ subsets: ["latin"], weight: "400" });
 
 const Navbar = () => {
   return (
-    <div className={quicksand.className}>
+    <div>
       <div
         className={`${styles.my_navbar} navbar bg-base-100 fixed top-0 min-h-12`}
       >
@@ -17,13 +17,19 @@ const Navbar = () => {
           </Link>
         </div>
         <div className="flex-none">
-          <Link href="/about" className="btn btn-ghost px-2 nav_btn_height">
+          {/* <Link href="/about" className="btn btn-ghost px-2 nav_btn_height">
             About
-          </Link>
-          <button className="btn btn-ghost px-2 mr-4 nav_btn_height">
+          </Link> */}
+
+          <a
+            href="https://github.com/Stefano-Civelli/facebook_ads_react"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-ghost px-2 mr-4 nav_btn_height flex items-center"
+          >
             <FaGithub />
             GitHub
-          </button>
+          </a>
         </div>
       </div>
       <div className="h-12 w-full"></div>

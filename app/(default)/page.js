@@ -14,7 +14,7 @@ export default function Home() {
   return (
     <DateProvider>
       <PartyProvider>
-        <div className="container grid grid-cols-1 lg:grid-cols-4 gap-7">
+        <div className="container grid grid-cols-1 lg:grid-cols-4 gap-7 dark">
           <div className="lg:col-span-1">
             <Sidebar />
           </div>

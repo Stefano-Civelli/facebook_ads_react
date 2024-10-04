@@ -396,7 +396,7 @@ def get_time_series():
     ]
     
     response_data = {
-        'title': '3-Day Moving Average Time Series',
+        'title': '3-Day Moving Average Time Series of Ad Impressions',
         'description': 'Time series of spend, impressions and number of ads',
         'x_label': 'Date',
         'y_label': ['Spend (Millions $)', 'Impressions', 'Number of Ads'],
@@ -411,5 +411,8 @@ def get_time_series():
 
 if __name__ == '__main__':
     app.run(debug=True)
+    # app.run(debug=True, use_reloader=False)
+    # or use the following comand when running the server
+    # flask run --no-reload
 
 

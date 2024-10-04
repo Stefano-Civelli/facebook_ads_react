@@ -43,18 +43,19 @@ const DemographicsBarchartComponent = ({ demographicType }) => {
 
   const { data, title } = apiResponse;
 
-  const formattedData = Object.keys(data[Object.keys(data)[0]].total).map(
-    (category) => ({
-      category,
-      ...Object.entries(data)
-        .flatMap(([party, values]) => [
-          [`${party}_total`, values.total[category]],
-          [`${party}_high`, values.high_persuasive[category]],
-          [`${party}_low`, values.low_persuasive[category]],
-        ])
-        .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {}),
-    })
+  const categories = Array.from(
+    new Set(Object.values(data).flatMap((party) => Object.keys(party.total)))
   );
+
+  const formattedData = categories.map((category) => {
+    const categoryData = { category };
+    Object.entries(data).forEach(([party, values]) => {
+      categoryData[`${party}_total`] = values.total[category] || 0;
+      categoryData[`${party}_high`] = values.high_persuasive[category] || 0;
+      categoryData[`${party}_low`] = values.low_persuasive[category] || 0;
+    });
+    return categoryData;
+  });
 
   const sortedParties = shortNameParties
     .map((party) => party.name)

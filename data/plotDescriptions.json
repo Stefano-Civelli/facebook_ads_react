@@ -24,11 +24,11 @@
       "blurText": "Placeholder for Regional Distribution Component blur text"
     },
     "genderDemographics": {
-      "infoContent": "Placeholder for Gender Demographics Component info",
+      "infoContent": "NOTE: The 'unknown' gender category was not included since it's representation in the dataset is not statistically significant (around than 1%).",
       "blurText": "Placeholder for Gender Demographics Component blur text"
     },
     "ageDemographics": {
-      "infoContent": "Placeholder for Age Demographics Component info",
+      "infoContent": "NOTE: The 13-17 age group was not included since it's representation in the dataset is not statistically significant (less than 0.1%).",
       "blurText": "Placeholder for Age Demographics Component blur text"
     }
   }
