@@ -40,10 +40,19 @@ const BarChartComponent = ({ dataType, title, valuePrefix = "" }) => {
     party: cleanString(party),
     low_persuasive: values[`low_persuasive_${dataType}`],
     high_persuasive: values[`high_persuasive_${dataType}`],
-    total: values[`total_${dataType}`],
+    others:
+      values[`total_${dataType}`] -
+      values[`low_persuasive_${dataType}`] -
+      values[`high_persuasive_${dataType}`],
   }));
 
-  const sortedData = formattedData.sort((a, b) => b.total - a.total);
+  const sortedData = formattedData.sort(
+    (a, b) =>
+      b.low_persuasive +
+      b.high_persuasive +
+      b.others -
+      (a.low_persuasive + a.high_persuasive + a.others)
+  );
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -104,10 +113,10 @@ const BarChartComponent = ({ dataType, title, valuePrefix = "" }) => {
           name="High Persuasive"
         />
         <Bar
-          dataKey="total"
+          dataKey="others"
           stackId="a"
           fill={chartColors.chart_color_2}
-          name="Total"
+          name="Others"
         />
       </BarChart>
     </ResponsiveContainer>

@@ -30,14 +30,20 @@ export default function Home() {
               <LineChartComponent />
             </GridItem>
             <div className="lg:col-span-3 grid grid-cols-1 lg:grid-cols-2 gap-x-8 w-full">
-              <GridItem infoContent={plotDesc.spendBarChart.infoContent}>
+              <GridItem
+                infoContent={plotDesc.spendBarChart.infoContent}
+                blurText={plotDesc.spendBarChart.blurText}
+              >
                 <BarChartComponent
                   dataType="spend"
                   title="Party Spend Breakdown"
                   valuePrefix="$"
                 />
               </GridItem>
-              <GridItem infoContent={plotDesc.impressionsBarChart.infoContent}>
+              <GridItem
+                infoContent={plotDesc.impressionsBarChart.infoContent}
+                blurText={plotDesc.impressionsBarChart.blurText}
+              >
                 <BarChartComponent
                   dataType="impressions"
                   title="Party Impressions Breakdown"
@@ -45,12 +51,14 @@ export default function Home() {
               </GridItem>
               <GridItem
                 infoContent={plotDesc.pieChart.infoContent}
+                blurText={plotDesc.pieChart.blurText}
                 className="border-[#f7b11a] border"
               >
                 <PieChartComponent />
               </GridItem>
               <GridItem
                 infoContent={plotDesc.regionalDistribution.infoContent}
+                blurText={plotDesc.regionalDistribution.blurText}
                 className="border-[#f7b21a] border"
               >
                 <RegionalDistributionComponent />
@@ -58,12 +66,14 @@ export default function Home() {
               <GridItem
                 className="h-[500px] border-[#f7b21a] border"
                 infoContent={plotDesc.genderDemographics.infoContent}
+                blurText={plotDesc.genderDemographics.blurText}
               >
                 <DemographicsBarchartComponent demographicType="gender" />
               </GridItem>
               <GridItem
                 className="h-[500px] border-[#f7b21a] border"
                 infoContent={plotDesc.ageDemographics.infoContent}
+                blurText={plotDesc.ageDemographics.blurText}
               >
                 <DemographicsBarchartComponent demographicType="age" />
               </GridItem>

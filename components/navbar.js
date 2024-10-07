@@ -13,7 +13,7 @@ const Navbar = () => {
       >
         <div className="flex-1">
           <Link href="/" className="btn btn-ghost text-xl nav_btn_height">
-            AU Federal Elections 2022
+            Persuasion Detection Dashboard
           </Link>
         </div>
         <div className="flex-none">

@@ -50,7 +50,10 @@ const DemographicsBarchartComponent = ({ demographicType }) => {
   const formattedData = categories.map((category) => {
     const categoryData = { category };
     Object.entries(data).forEach(([party, values]) => {
-      categoryData[`${party}_total`] = values.total[category] || 0;
+      categoryData[`${party}_others`] =
+        values.total[category] -
+          values.high_persuasive[category] -
+          values.low_persuasive[category] || 0;
       categoryData[`${party}_high`] = values.high_persuasive[category] || 0;
       categoryData[`${party}_low`] = values.low_persuasive[category] || 0;
     });
@@ -92,12 +95,14 @@ const DemographicsBarchartComponent = ({ demographicType }) => {
                   }}
                 >
                   <p className="font-bold">{party}</p>
-                  <p className="text-sm">Total: {formatNumber(values.total)}</p>
                   <p className="text-sm">
                     High Persuasive: {formatNumber(values.high)}
                   </p>
                   <p className="text-sm">
                     Low Persuasive: {formatNumber(values.low)}
+                  </p>
+                  <p className="text-sm">
+                    Others: {formatNumber(values.others)}
                   </p>
                 </div>
               ))}
@@ -152,7 +157,7 @@ const DemographicsBarchartComponent = ({ demographicType }) => {
             <svg width="20" height="20" style={{ marginRight: 5 }}>
               <rect width="20" height="20" fill="#888" />
             </svg>
-            <span>Total</span>
+            <span>Others</span>
           </div>
         </div>
       </div>
@@ -249,7 +254,7 @@ const DemographicsBarchartComponent = ({ demographicType }) => {
                 stackId={party}
                 fill={`url(#${party}-stripes)`}
               />
-              <Bar dataKey={`${party}_total`} stackId={party} fill={color} />
+              <Bar dataKey={`${party}_others`} stackId={party} fill={color} />
             </React.Fragment>
           );
         })}
