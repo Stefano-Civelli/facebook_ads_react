@@ -109,28 +109,6 @@ const Sidebar = () => {
         updateSelectedParties={updateSelectedParties}
       />
 
-      {/* <div className="my-6">
-        <button
-          className="flex items-center text-sm text-blue-400 hover:text-blue-300 transition-colors duration-200"
-          onClick={() => setShowInfo(!showInfo)}
-        >
-          <Info size={16} className="mr-1" />
-          {showInfo ? "Hide" : "Show"} Info
-          {showInfo ? (
-            <ChevronUp size={16} className="ml-1" />
-          ) : (
-            <ChevronDown size={16} className="ml-1" />
-          )}
-        </button>
-        {showInfo && (
-          <div className="mt-2 text-sm text-gray-300 p-3">
-            This dashboard provides insights into the advertising spend and
-            impressions for the 2022 Australian Federal Election campaign.
-            Explore party-wise data and trends leading up to the election day.
-          </div>
-        )}
-      </div> */}
-
       <div className="mt-6 p-3 bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-lg">
         <h3 className="font-semibold mb-2 flex items-center">
           <MousePointer size={16} className="mr-2" />
