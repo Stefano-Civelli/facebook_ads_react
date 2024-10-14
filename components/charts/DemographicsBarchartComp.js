@@ -15,6 +15,7 @@ import { useDateContext } from "../../context/DateContext";
 import { usePartyContext } from "@/context/PartyContext";
 import { formatNumber } from "@/lib/util";
 import { shortNameParties } from "@/lib/config";
+import { useTheme } from "@/context/ThemeContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -23,6 +24,7 @@ const fetcher = (...args) => fetch(...args).then((res) => res.json());
 const DemographicsBarchartComponent = ({ demographicType }) => {
   const { startDate, endDate } = useDateContext();
   const { selectedParties } = usePartyContext();
+  const { isDarkMode } = useTheme();
 
   const {
     data: apiResponse,
@@ -82,8 +84,18 @@ const DemographicsBarchartComponent = ({ demographicType }) => {
       }
 
       return (
-        <div className="p-4 bg-slate-900 flex flex-col gap-4 rounded-md">
-          <p className="text-medium text-lg">{label}</p>
+        <div
+          className={`p-4 ${
+            isDarkMode ? "bg-slate-900" : "bg-white"
+          } flex flex-col gap-4 rounded-md border border-gray-200`}
+        >
+          <p
+            className={`text-medium text-lg ${
+              isDarkMode ? "text-white" : "text-black"
+            }`}
+          >
+            {label}
+          </p>
           {rows.map((row, rowIndex) => (
             <div key={rowIndex} className="flex gap-4">
               {row.map(([party, values]) => (
@@ -135,7 +147,9 @@ const DemographicsBarchartComponent = ({ demographicType }) => {
                     marginRight: 5,
                   }}
                 />
-                <span>{party}</span>
+                <span className={isDarkMode ? "text-white" : "text-black"}>
+                  {party}
+                </span>
               </div>
             );
           })}
@@ -145,19 +159,25 @@ const DemographicsBarchartComponent = ({ demographicType }) => {
             <svg width="20" height="20" style={{ marginRight: 5 }}>
               <rect width="20" height="20" fill="url(#legend-dots)" />
             </svg>
-            <span>Low Persuasive</span>
+            <span className={isDarkMode ? "text-white" : "text-black"}>
+              Low Persuasive
+            </span>
           </div>
           <div className="flex items-center">
             <svg width="20" height="20" style={{ marginRight: 5 }}>
               <rect width="20" height="20" fill="url(#legend-stripes)" />
             </svg>
-            <span>High Persuasive</span>
+            <span className={isDarkMode ? "text-white" : "text-black"}>
+              High Persuasive
+            </span>
           </div>
           <div className="flex items-center">
             <svg width="20" height="20" style={{ marginRight: 5 }}>
               <rect width="20" height="20" fill="#888" />
             </svg>
-            <span>Others</span>
+            <span className={isDarkMode ? "text-white" : "text-black"}>
+              Others
+            </span>
           </div>
         </div>
       </div>
@@ -170,7 +190,13 @@ const DemographicsBarchartComponent = ({ demographicType }) => {
       height="100%"
       className="flex flex-col items-center justify-center"
     >
-      <h3 className="text-lg font-semibold text-white mt-5">{title}</h3>
+      <h3
+        className={`text-lg font-semibold ${
+          isDarkMode ? "text-white" : "text-black"
+        } mt-5`}
+      >
+        {title}
+      </h3>
       <BarChart
         layout="vertical"
         data={formattedData}
@@ -231,13 +257,22 @@ const DemographicsBarchartComponent = ({ demographicType }) => {
             <circle cx="1.5" cy="1.5" r="0.5" fill="#888" />
           </pattern>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="#555555" />
+        <CartesianGrid
+          horizontal={false}
+          vertical={true}
+          strokeDasharray="3 3"
+          stroke={isDarkMode ? "#555555" : "#e0e0e0"}
+        />
         <XAxis
           type="number"
           tickFormatter={(value) => `${(value / 1000000).toFixed(1)}M`}
-          tick={{ fill: "#999" }}
+          tick={{ fill: isDarkMode ? "#999" : "#333" }}
         />
-        <YAxis type="category" dataKey="category" tick={{ fill: "#999" }} />
+        <YAxis
+          type="category"
+          dataKey="category"
+          tick={{ fill: isDarkMode ? "#999" : "#333" }}
+        />
         <Tooltip content={<CustomTooltip />} />
         <Legend content={<CustomLegend />} />
         {sortedParties.map((party) => {

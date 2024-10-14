@@ -9,6 +9,7 @@ import { useDateContext } from "@/context/DateContext";
 import { usePartyContext } from "@/context/PartyContext";
 import { australianRegions } from "@/lib/config";
 import { formatNumber } from "@/lib/util";
+import { useTheme } from "@/context/ThemeContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -27,6 +28,7 @@ const RegionalDistributionComponent = ({
   const [mapOptions, setMapOptions] = useState({});
   const [title, setTitle] = useState("");
   const { selectedParties } = usePartyContext();
+  const { isDarkMode } = useTheme();
 
   const { data, error, isLoading } = useSWR(
     `${API_URL}/api/spend-and-impressions-by-region?startDate=${startDate}&endDate=${endDate}&parties=${selectedParties}`,
@@ -83,7 +85,7 @@ const RegionalDistributionComponent = ({
             ],
             labels: {
               style: {
-                color: "#ffffff",
+                color: isDarkMode ? "#ffffff" : "#000000",
               },
             },
           },
@@ -95,11 +97,11 @@ const RegionalDistributionComponent = ({
             title: {
               text: "Impressions",
               style: {
-                color: "#ffffff",
+                color: isDarkMode ? "#ffffff" : "#000000",
               },
             },
             itemStyle: {
-              color: "#ffffff",
+              color: isDarkMode ? "#ffffff" : "#000000",
             },
           },
           series: [
@@ -151,10 +153,10 @@ const RegionalDistributionComponent = ({
             },
           ],
           tooltip: {
-            backgroundColor: "#0f1729",
+            backgroundColor: isDarkMode ? "#0f1729" : "#ffffff",
             borderWidth: 0,
             style: {
-              color: "#ffffff",
+              color: isDarkMode ? "#ffffff" : "#000000",
             },
             useHTML: true,
             pointFormatter: function () {
@@ -162,9 +164,10 @@ const RegionalDistributionComponent = ({
               const contentFontSize = "14px";
               const impressions =
                 this.value !== undefined ? this.value : this.z;
+              const textColor = isDarkMode ? "white" : "black";
 
               return `
-                <div style="color: white;">
+                <div style="color: ${textColor};">
                   <div style="font-size: ${titleFontSize}; font-weight: bold; margin-bottom: 12px;">
                     ${this.name}
                   </div>
@@ -194,7 +197,7 @@ const RegionalDistributionComponent = ({
       }
     };
     fetchMapData();
-  }, [data]);
+  }, [data, isDarkMode]);
 
   if (error) return <div>failed to load</div>;
   if (isLoading)
@@ -209,7 +212,13 @@ const RegionalDistributionComponent = ({
       style={{ width, height }}
       className="flex flex-col items-center justify-center"
     >
-      <h3 className="text-lg font-semibold text-white mt-5">{title}</h3>
+      <h3
+        className={`text-lg font-semibold ${
+          isDarkMode ? "text-white" : "text-black"
+        } mt-5`}
+      >
+        {title}
+      </h3>
       <HighchartsReact
         highcharts={Highcharts}
         options={mapOptions}

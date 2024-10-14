@@ -7,6 +7,7 @@ import { useDateContext } from "@/context/DateContext";
 import { usePartyContext } from "@/context/PartyContext";
 import { chartColors } from "@/lib/config.js";
 import { formatMillions } from "@/lib/util";
+import { useTheme } from "@/context/ThemeContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -16,6 +17,7 @@ const ImpressionsPieComponent = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const { startDate, endDate } = useDateContext();
   const { selectedParties } = usePartyContext();
+  const { isDarkMode } = useTheme();
 
   const { data, error, isLoading } = useSWR(
     `${API_URL}/api/general-stats?startDate=${startDate}&endDate=${endDate}&parties=${selectedParties}`,
@@ -88,10 +90,22 @@ const ImpressionsPieComponent = () => {
 
     return (
       <g>
-        <text x={cx} y={cy - 10} dy={8} textAnchor="middle" fill="#FFFFFF">
+        <text
+          x={cx}
+          y={cy - 10}
+          dy={8}
+          textAnchor="middle"
+          fill={isDarkMode ? "#FFFFFF" : "#000000"}
+        >
           {payload.name.split(" ")[0]}
         </text>
-        <text x={cx} y={cy + 10} dy={8} textAnchor="middle" fill="#FFFFFF">
+        <text
+          x={cx}
+          y={cy + 10}
+          dy={8}
+          textAnchor="middle"
+          fill={isDarkMode ? "#FFFFFF" : "#000000"}
+        >
           {payload.name.split(" ")[1] || ""}
         </text>
         <Sector
@@ -123,7 +137,7 @@ const ImpressionsPieComponent = () => {
           x={ex + (cos >= 0 ? 1 : -1) * 12}
           y={ey}
           textAnchor={textAnchor}
-          fill="#FFFFFF"
+          fill={isDarkMode ? "#FFFFFF" : "#000000"}
           fontSize="16"
           fontWeight="bold"
         >
@@ -134,7 +148,7 @@ const ImpressionsPieComponent = () => {
           y={ey - 5}
           dy={24}
           textAnchor={textAnchor}
-          fill="#999"
+          fill={isDarkMode ? "#999" : "#666"}
         >
           {`Imp: ${formatMillions(value)}`}
         </text>
@@ -143,7 +157,7 @@ const ImpressionsPieComponent = () => {
           y={ey - 5}
           dy={42}
           textAnchor={textAnchor}
-          fill="#999"
+          fill={isDarkMode ? "#999" : "#666"}
         >
           {`Spend: $${formatMillions(payload.spend)}`}
         </text>
@@ -152,7 +166,7 @@ const ImpressionsPieComponent = () => {
           y={ey - 5}
           dy={60}
           textAnchor={textAnchor}
-          fill="#999"
+          fill={isDarkMode ? "#999" : "#666"}
         >
           {`CPTI: $${payload.cpti.toFixed(2)}*`}
         </text>
@@ -162,7 +176,11 @@ const ImpressionsPieComponent = () => {
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <h3 className="text-lg font-semibold text-white text-center mb-4">
+      <h3
+        className={`text-lg font-semibold ${
+          isDarkMode ? "text-white" : "text-black"
+        } text-center mb-4`}
+      >
         Impressions Distribution
       </h3>
 
@@ -185,7 +203,11 @@ const ImpressionsPieComponent = () => {
         </Pie>
       </PieChart>
 
-      <p className="absolute bottom-2 right-2 ">
+      <p
+        className={`absolute bottom-2 right-2 ${
+          isDarkMode ? "text-white" : "text-black"
+        }`}
+      >
         *CPTI: Cost Per Thousand Impressions
       </p>
     </ResponsiveContainer>

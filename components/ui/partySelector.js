@@ -8,7 +8,9 @@ export const PartySelector = ({ value, onChange, className }) => {
   return (
     <select
       className={cn(
-        "select select-xs z-10 bg-gray-800 text-white border border-gray-700",
+        "select select-xs z-10",
+        "bg-gray-100 text-black border-gray-300",
+        "dark:bg-gray-800 dark:text-white dark:border-gray-700",
         className
       )}
       value={value}

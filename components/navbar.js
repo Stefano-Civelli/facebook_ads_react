@@ -4,6 +4,7 @@ import Link from "next/link";
 import styles from "@/styles/navbar.module.css";
 import { FaGithub } from "react-icons/fa";
 import { Quicksand } from "next/font/google";
+import ThemeToggle from "./ThemeToggle";
 
 const quicksand = Quicksand({ subsets: ["latin"], weight: "400" });
 
@@ -46,6 +47,7 @@ const Navbar = () => {
             <FaGithub />
             <span className="text-sm">GitHub</span>
           </button>
+          <ThemeToggle />
         </div>
       </div>
       <div className="h-12 w-full"></div>

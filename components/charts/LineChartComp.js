@@ -18,6 +18,7 @@ import { chartColors } from "@/lib/config.js";
 import { formatDate, formatNumber } from "@/lib/util.js";
 import { useState } from "react";
 import { PartySelector } from "../ui/partySelector";
+import { useTheme } from "@/context/ThemeContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -27,6 +28,7 @@ const LineChartComponent = () => {
   const { startDate, endDate } = useDateContext();
   const [party1, setParty1] = useState("Labor");
   const [party2, setParty2] = useState("Liberal");
+  const { isDarkMode } = useTheme();
 
   const {
     data: data1,
@@ -54,9 +56,43 @@ const LineChartComponent = () => {
       </div>
     );
 
+  const CustomTooltipImpressions = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div
+          className={`p-4 ${
+            isDarkMode ? "bg-slate-900" : "bg-white"
+          } flex flex-col gap-4 rounded-md ${
+            !isDarkMode ? "border border-gray-200" : ""
+          }`}
+        >
+          <p
+            className={`text-medium text-lg ${
+              isDarkMode ? "text-white" : "text-black"
+            }`}
+          >
+            {formatDate(label)}
+          </p>
+          {payload.map((entry, index) => (
+            <p key={index} className="text-sm" style={{ color: entry.stroke }}>
+              <span className="ml-2">{formatNumber(entry.value)}</span>
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
-    <div className=" w-full flex flex-col items-center justify-center h-full">
-      <h3 className="text-lg font-semibold text-white ">{data1.title}</h3>
+    <div className="w-full flex flex-col items-center justify-center h-full">
+      <h3
+        className={`text-lg font-semibold ${
+          isDarkMode ? "text-white" : "text-black"
+        } mt-5`}
+      >
+        {data1.title}
+      </h3>
       <div className="w-full relative">
         <PartySelector
           value={party1}
@@ -74,15 +110,18 @@ const LineChartComponent = () => {
               bottom: 5,
             }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#555555" />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke={isDarkMode ? "#555555" : "#e0e0e0"}
+            />
             <XAxis
               dataKey="date"
               tickFormatter={formatDate}
-              tick={{ fill: "#999" }}
+              tick={{ fill: isDarkMode ? "#999" : "#333" }}
             />
             <YAxis
               tickFormatter={(x) => `${x / 1000000}M`}
-              tick={{ fill: "#999" }}
+              tick={{ fill: isDarkMode ? "#999" : "#333" }}
             />
 
             <Tooltip content={<CustomTooltipImpressions />} />
@@ -121,7 +160,7 @@ const LineChartComponent = () => {
               strokeDasharray="3 3"
               label={{
                 value: "Election Day (21 May)",
-                fill: "white",
+                fill: isDarkMode ? "white" : "black",
                 position: "top",
               }}
             />
@@ -132,7 +171,7 @@ const LineChartComponent = () => {
               strokeDasharray="3 3"
               label={{
                 value: "Call for Election (10 April)",
-                fill: "white",
+                fill: isDarkMode ? "white" : "black",
                 position: "top",
               }}
             />
@@ -151,15 +190,18 @@ const LineChartComponent = () => {
             syncId="timeSeriesCharts"
             margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="#555555" />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke={isDarkMode ? "#555555" : "#e0e0e0"}
+            />
             <XAxis
               dataKey="date"
               tickFormatter={formatDate}
-              tick={{ fill: "#999" }}
+              tick={{ fill: isDarkMode ? "#999" : "#333" }}
             />
             <YAxis
               tickFormatter={(x) => `${x / 1000000}M`}
-              tick={{ fill: "#999" }}
+              tick={{ fill: isDarkMode ? "#999" : "#333" }}
             />
             <Tooltip content={<CustomTooltipImpressions />} />
             <Legend />
@@ -203,19 +245,3 @@ const LineChartComponent = () => {
 };
 
 export default LineChartComponent;
-
-const CustomTooltipImpressions = ({ active, payload, label }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="p-4 bg-slate-900 flex flex-col gap-4 rounded-md">
-        <p className="text-medium text-lg">{formatDate(label)}</p>
-        <p className="text-sm" style={{ color: payload[0].stroke }}>
-          <span className="ml-2">{formatNumber(payload[0].value)}</span>
-        </p>
-        <p className="text-sm" style={{ color: payload[1].stroke }}>
-          <span className="ml-2">{formatNumber(payload[1].value)}</span>
-        </p>
-      </div>
-    );
-  }
-};

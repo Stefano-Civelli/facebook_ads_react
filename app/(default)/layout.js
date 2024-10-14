@@ -2,6 +2,7 @@
 import "./globals.css";
 import Footer from "@/components/footer";
 import Navbar from "@/components/navbar";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 export const metadata = {
   title: "Persuasion Dash",
@@ -17,11 +18,13 @@ export default function RootLayout({ children }) {
           content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
         />
       </head>
-      <body>
-        <Navbar />
-        <div className="main-content">{children}</div>
-        <Footer />
-      </body>
+      <ThemeProvider>
+        <body className="transition-colors duration-300">
+          <Navbar />
+          <div className="main-content">{children}</div>
+          <Footer />
+        </body>
+      </ThemeProvider>
     </html>
   );
 }

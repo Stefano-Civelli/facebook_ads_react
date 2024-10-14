@@ -11,10 +11,18 @@ const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 const StatItem = ({ label, value, subValue }) => (
   <div className="flex flex-col items-center justify-center p-2 text-center h-full">
-    <h4 className="text-sm font-semibold text-gray-300 mb-1">{label}</h4>
+    <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+      {label}
+    </h4>
     <div className="flex-grow flex flex-col items-center justify-center">
-      <p className="text-lg font-bold text-blue-400">{value}</p>
-      {subValue && <p className="text-xs text-gray-400 mt-1">{subValue}</p>}
+      <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
+        {value}
+      </p>
+      {subValue && (
+        <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+          {subValue}
+        </p>
+      )}
     </div>
   </div>
 );
@@ -26,7 +34,8 @@ const GeneralStatsComponent = () => {
     fetcher
   );
 
-  if (error) return <div>Failed to load</div>;
+  if (error)
+    return <div className="text-red-600 dark:text-red-400">Failed to load</div>;
   if (isLoading)
     return (
       <div className="h-full flex items-center justify-center">
