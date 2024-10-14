@@ -51,8 +51,8 @@ const LineChartComponent = () => {
   if (error1 || error2) return <div>Failed to load</div>;
   if (isLoading1 || isLoading2)
     return (
-      <div className="h-[300px] flex items-center">
-        <span className="loading loading-spinner loading-lg"></span>
+      <div className="h-[300px] flex items-center justify-center">
+        <span className="loading loading-spinner loading-lg text-black dark:text-white"></span>
       </div>
     );
 
@@ -83,6 +83,8 @@ const LineChartComponent = () => {
     }
     return null;
   };
+
+  const getDotColor = () => (isDarkMode ? "white" : "black");
 
   return (
     <div className="w-full flex flex-col items-center justify-center h-full">
@@ -131,10 +133,10 @@ const LineChartComponent = () => {
               dataKey="high_persuasive_impressions"
               stroke={chartColors.chart_color_1}
               name="High Persuasive Impressions"
-              dot={{ r: 1, strokeWidth: 0 }}
+              dot={{ r: 1, strokeWidth: 0, fill: getDotColor() }}
               activeDot={{
                 strokeWidth: 0,
-                fill: "white",
+                fill: getDotColor(),
                 r: 3,
               }}
               strokeWidth={1.7}
@@ -145,10 +147,10 @@ const LineChartComponent = () => {
               dataKey="low_persuasive_impressions"
               stroke={chartColors.chart_color_3}
               name="Low Persuasive Impressions"
-              dot={{ r: 1, strokeWidth: 0 }}
+              dot={{ r: 1, strokeWidth: 0, fill: getDotColor() }}
               activeDot={{
                 strokeWidth: 0,
-                fill: "white",
+                fill: getDotColor(),
                 r: 3,
               }}
               strokeWidth={1.7}
@@ -210,10 +212,10 @@ const LineChartComponent = () => {
               dataKey="high_persuasive_impressions"
               stroke={chartColors.chart_color_1}
               name="High Persuasive Impressions"
-              dot={{ r: 1, strokeWidth: 0 }}
+              dot={{ r: 1, strokeWidth: 0, fill: getDotColor() }}
               activeDot={{
                 strokeWidth: 0,
-                fill: "white",
+                fill: getDotColor(),
                 r: 3,
               }}
               strokeWidth={1.7}
@@ -223,10 +225,10 @@ const LineChartComponent = () => {
               dataKey="low_persuasive_impressions"
               stroke={chartColors.chart_color_3}
               name="Low Persuasive Impressions"
-              dot={{ r: 1, strokeWidth: 0 }}
+              dot={{ r: 1, strokeWidth: 0, fill: getDotColor() }}
               activeDot={{
                 strokeWidth: 0,
-                fill: "white",
+                fill: getDotColor(),
                 r: 3,
               }}
               strokeWidth={1.7}

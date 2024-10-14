@@ -27,8 +27,8 @@ const ImpressionsPieComponent = () => {
   if (error) return <div>Failed to load</div>;
   if (isLoading)
     return (
-      <div className="h-[500px] flex items-center justify-center">
-        <span className="loading loading-spinner loading-lg"></span>
+      <div className="h-[300px] flex items-center justify-center">
+        <span className="loading loading-spinner loading-lg text-black dark:text-white"></span>
       </div>
     );
 

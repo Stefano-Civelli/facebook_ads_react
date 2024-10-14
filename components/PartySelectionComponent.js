@@ -38,8 +38,10 @@ const PartySelectionComponent = ({
   }, [selectedParties]);
 
   return (
-    <div className="mb-6 p-4  rounded-lg shadow-lg border-[#f7b21a] border">
-      <h3 className="font-semibold mb-3 flex items-center">Select Parties</h3>
+    <div className="mb-6 p-4 rounded-lg shadow-lg border-[#f7b21a] border">
+      <h3 className="font-semibold mb-3 flex items-center text-black dark:text-white">
+        Select Parties
+      </h3>
       <label className="flex items-center space-x-2 mb-2">
         <input
           type="checkbox"
@@ -47,7 +49,7 @@ const PartySelectionComponent = ({
           onChange={(e) => handleSelectAll(e.target.checked)}
           className="checkbox checkbox-sm"
         />
-        <span className="text-sm">Select All</span>
+        <span className="text-sm text-black dark:text-white">Select All</span>
       </label>
       {parties.map((party) => (
         <label key={party.name} className="flex items-center space-x-2 mb-2">
@@ -58,7 +60,9 @@ const PartySelectionComponent = ({
             className="checkbox checkbox-sm"
           />
           <span className={`w-3 h-3 rounded-full ${party.color}`}></span>
-          <span className="text-sm">{party.name}</span>
+          <span className="text-sm text-black dark:text-white">
+            {party.name}
+          </span>
         </label>
       ))}
       {showAlert && (

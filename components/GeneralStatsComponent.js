@@ -38,8 +38,8 @@ const GeneralStatsComponent = () => {
     return <div className="text-red-600 dark:text-red-400">Failed to load</div>;
   if (isLoading)
     return (
-      <div className="h-full flex items-center justify-center">
-        <span className="loading loading-spinner loading-lg"></span>
+      <div className="h-[300px] flex items-center justify-center">
+        <span className="loading loading-spinner loading-lg text-black dark:text-white"></span>
       </div>
     );
 

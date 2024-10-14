@@ -17,7 +17,11 @@ export default function Home() {
   const { isDarkMode } = useTheme();
 
   return (
-    <div className={isDarkMode ? "dark" : ""}>
+    <div
+      className={`${
+        isDarkMode ? "dark bg-[#020617]" : "bg-white"
+      } w-full flex justify-center`}
+    >
       <DateProvider>
         <PartyProvider>
           <div className="container grid grid-cols-1 lg:grid-cols-4 gap-7">
