@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import styles from "@/styles/navbar.module.css";
 import { FaGithub } from "react-icons/fa";
@@ -21,7 +23,8 @@ const Navbar = () => {
             About
           </Link> */}
 
-          <a
+          {/* GitHub button (commented out) */}
+          {/* <a
             href="https://github.com/Stefano-Civelli/facebook_ads_react"
             target="_blank"
             rel="noopener noreferrer"
@@ -29,7 +32,20 @@ const Navbar = () => {
           >
             <FaGithub />
             GitHub
-          </a>
+          </a> */}
+
+          {/* Temporary message button */}
+          <button
+            className="btn btn-ghost px-2 mr-4 nav_btn_height flex items-center"
+            onClick={() =>
+              alert(
+                "The GitHub link is temporarily unavailable due to the blind review process."
+              )
+            }
+          >
+            <FaGithub />
+            <span className="text-sm">GitHub</span>
+          </button>
         </div>
       </div>
       <div className="h-12 w-full"></div>

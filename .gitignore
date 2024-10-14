@@ -49,3 +49,7 @@ __pycache__/
 # open-next
 .open-next
 */.idea
+
+
+# ignore cursorrules file
+.cursorrules

@@ -1,18 +1,10 @@
 import React from "react";
-import Image from "next/image";
 
 const Footer = () => {
   return (
     <footer className="footer footer-center uq-color text-primary-content p-10 relative z-10">
       <aside>
-        <Image
-          src="/uq-logo-white.svg"
-          alt="University Logo"
-          width={200}
-          height={100}
-          className="inline-block fill-current mb-1"
-        />
-        <p>Copyright © {new Date().getFullYear()} - All right reserved</p>
+        <p>© {new Date().getFullYear()} - Licensed under AGPL-3.0</p>
       </aside>
     </footer>
   );
