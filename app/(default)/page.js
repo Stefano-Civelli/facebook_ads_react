@@ -5,6 +5,7 @@ import BarChartComponent from "@/components/charts/BarChartComp";
 import LineChartComponent from "@/components/charts/LineChartComp";
 import GeneralStatsComponent from "@/components/GeneralStatsComponent";
 import GridItem from "@/components/GridItemComp";
+import TableComponent from "@/components/TableComponent";
 import PieChartComponent from "@/components/charts/PieChartComp";
 import RegionalDistributionComponent from "@/components/charts/RegionalDistributionComp";
 import { DateProvider } from "@/context/DateContext";
@@ -86,6 +87,20 @@ export default function Home() {
                   blurText={plotDesc.ageDemographics.blurText}
                 >
                   <DemographicsBarchartComponent demographicType="age" />
+                </GridItem>
+                <GridItem
+                  className="h-[500px] border"
+                  infoContent="Analysis of the most common terms in highly persuasive political ads."
+                  blurText="Linguistic patterns in persuasive content"
+                >
+                  <TableComponent tableType="tfidf" />
+                </GridItem>
+                <GridItem
+                  className="h-[500px] border"
+                  infoContent="Analysis of the most common phrase pairs in political advertisements."
+                  blurText="Persuasive language patterns"
+                >
+                  <TableComponent tableType="bigrams" />
                 </GridItem>
               </div>
             </div>
