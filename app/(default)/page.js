@@ -63,26 +63,26 @@ export default function Home() {
                 <GridItem
                   infoContent={plotDesc.pieChart.infoContent}
                   blurText={plotDesc.pieChart.blurText}
-                  className="border-[#f7b11a] border"
+                  className="!border-[#f7b11a80] border"
                 >
                   <PieChartComponent />
                 </GridItem>
                 <GridItem
                   infoContent={plotDesc.regionalDistribution.infoContent}
                   blurText={plotDesc.regionalDistribution.blurText}
-                  className="border-[#f7b21a] border"
+                  className="!border-[#f7b11a80] border"
                 >
                   <RegionalDistributionComponent />
                 </GridItem>
                 <GridItem
-                  className="h-[500px] border-[#f7b21a] border"
+                  className="h-[500px] !border-[#f7b11a80] border"
                   infoContent={plotDesc.genderDemographics.infoContent}
                   blurText={plotDesc.genderDemographics.blurText}
                 >
                   <DemographicsBarchartComponent demographicType="gender" />
                 </GridItem>
                 <GridItem
-                  className="h-[500px] border-[#f7b21a] border"
+                  className="h-[500px] !border-[#f7b11a80] border"
                   infoContent={plotDesc.ageDemographics.infoContent}
                   blurText={plotDesc.ageDemographics.blurText}
                 >

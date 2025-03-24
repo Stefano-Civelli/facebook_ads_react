@@ -38,7 +38,7 @@ const PartySelectionComponent = ({
   }, [selectedParties]);
 
   return (
-    <div className="mb-6 p-4 rounded-lg shadow-lg border-[#f7b21a] border">
+    <div className="mb-6 p-4 rounded-lg shadow-lg border-[#f7b11a80] border">
       <h3 className="font-semibold mb-3 flex items-center text-black dark:text-white">
         Select Parties
       </h3>
