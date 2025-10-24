@@ -18,7 +18,10 @@ export const DataProvider = ({ children }) => {
 
     const loadData = async () => {
       try {
-        const response = await fetch("/data/preprocessed-data.json");
+        const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+        const response = await fetch(
+          `${basePath}/data/preprocessed-data.json`
+        );
         if (!response.ok) {
           throw new Error(`Failed to load static dataset: ${response.status}`);
         }
