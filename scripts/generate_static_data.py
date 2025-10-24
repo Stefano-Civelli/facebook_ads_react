@@ -161,6 +161,12 @@ def build_time_series(party_daily_totals):
 
 def main() -> None:
     if not SOURCE_CSV.exists():
+        if OUTPUT_PATH.exists():
+            print(
+                f"Source CSV not found at {SOURCE_CSV}; "
+                "skipping regeneration and reusing existing static dataset."
+            )
+            return
         raise FileNotFoundError(f"Source CSV not found at {SOURCE_CSV}")
 
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
