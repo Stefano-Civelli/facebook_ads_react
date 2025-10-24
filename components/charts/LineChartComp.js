@@ -12,44 +12,39 @@ import {
   ReferenceLine,
 } from "recharts";
 
-import useSWR from "swr";
 import { useDateContext } from "../../context/DateContext";
 import { chartColors } from "@/lib/config.js";
 import { formatDate, formatNumber } from "@/lib/util.js";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { PartySelector } from "../ui/partySelector";
 import { useTheme } from "@/context/ThemeContext";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
-const fetcher = (...args) => fetch(...args).then((res) => res.json());
+import { useStaticData } from "@/context/DataContext";
+import { getTimeSeriesForParty } from "@/lib/staticCalculations";
 
 const LineChartComponent = () => {
   const { startDate, endDate } = useDateContext();
   const [party1, setParty1] = useState("Labor");
   const [party2, setParty2] = useState("Liberal");
   const { isDarkMode } = useTheme();
+  const { data, error, isLoading } = useStaticData();
 
-  const {
-    data: data1,
-    error: error1,
-    isLoading: isLoading1,
-  } = useSWR(
-    `${API_URL}/api/time-series?startDate=${startDate}&endDate=${endDate}&party=${party1}`,
-    fetcher
-  );
+  const [series1, series2] = useMemo(() => {
+    if (!data) return [null, null];
+    const partySeries1 = getTimeSeriesForParty(data, party1);
+    const partySeries2 = getTimeSeriesForParty(data, party2);
+    const filterByDate = (series) =>
+      series.filter(
+        (entry) => entry.date >= startDate && entry.date <= endDate
+      );
+    return [filterByDate(partySeries1), filterByDate(partySeries2)];
+  }, [data, party1, party2, startDate, endDate]);
 
-  const {
-    data: data2,
-    error: error2,
-    isLoading: isLoading2,
-  } = useSWR(
-    `${API_URL}/api/time-series?startDate=${startDate}&endDate=${endDate}&party=${party2}`,
-    fetcher
-  );
+  const chartTitle = data?.timeSeries?.[party1]?.length
+    ? "3-Day Moving Average Time Series of Ad Impressions"
+    : "Time Series";
 
-  if (error1 || error2) return <div>Failed to load</div>;
-  if (isLoading1 || isLoading2)
+  if (error) return <div>Failed to load dataset</div>;
+  if (isLoading || !series1 || !series2)
     return (
       <div className="h-[300px] flex items-center justify-center">
         <span className="loading loading-spinner loading-lg text-black dark:text-white"></span>
@@ -93,7 +88,7 @@ const LineChartComponent = () => {
           isDarkMode ? "text-white" : "text-black"
         } mt-5`}
       >
-        {data1.title}
+        {chartTitle}
       </h3>
       <div className="w-full relative">
         <PartySelector
@@ -103,7 +98,7 @@ const LineChartComponent = () => {
 
         <ResponsiveContainer width="100%" height={270}>
           <LineChart
-            data={data1.data}
+            data={series1}
             syncId="timeSeriesCharts"
             margin={{
               right: 30,
@@ -188,7 +183,7 @@ const LineChartComponent = () => {
         />
         <ResponsiveContainer width="100%" height={270}>
           <LineChart
-            data={data2.data}
+            data={series2}
             syncId="timeSeriesCharts"
             margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
           >

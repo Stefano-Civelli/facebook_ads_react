@@ -1,31 +1,29 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { PieChart, Pie, Sector, ResponsiveContainer, Cell } from "recharts";
-import useSWR from "swr";
 import { useDateContext } from "@/context/DateContext";
 import { usePartyContext } from "@/context/PartyContext";
 import { chartColors } from "@/lib/config.js";
 import { formatMillions } from "@/lib/util";
 import { useTheme } from "@/context/ThemeContext";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
-const fetcher = (...args) => fetch(...args).then((res) => res.json());
+import { useStaticData } from "@/context/DataContext";
+import { computeGeneralStats } from "@/lib/staticCalculations";
 
 const ImpressionsPieComponent = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const { startDate, endDate } = useDateContext();
   const { selectedParties } = usePartyContext();
   const { isDarkMode } = useTheme();
+  const { data, error, isLoading } = useStaticData();
 
-  const { data, error, isLoading } = useSWR(
-    `${API_URL}/api/general-stats?startDate=${startDate}&endDate=${endDate}&parties=${selectedParties}`,
-    fetcher
-  );
+  const statsResponse = useMemo(() => {
+    if (!data) return null;
+    return computeGeneralStats(data, startDate, endDate, selectedParties);
+  }, [data, startDate, endDate, selectedParties]);
 
-  if (error) return <div>Failed to load</div>;
-  if (isLoading)
+  if (error) return <div>Failed to load dataset</div>;
+  if (isLoading || !statsResponse)
     return (
       <div className="h-[300px] flex items-center justify-center">
         <span className="loading loading-spinner loading-lg text-black dark:text-white"></span>
@@ -35,21 +33,21 @@ const ImpressionsPieComponent = () => {
   const pieData = [
     {
       name: "Other Impressions",
-      value: data.data.total_impressions_other,
-      spend: data.data.total_spend_other,
-      cpti: data.data.cost_per_thousand_impressions_other,
+      value: statsResponse.data.total_impressions_other,
+      spend: statsResponse.data.total_spend_other,
+      cpti: statsResponse.data.cost_per_thousand_impressions_other,
     },
     {
       name: "High Persuasive",
-      value: data.data.total_impressions_high_persuasive,
-      spend: data.data.total_spend_high_persuasive,
-      cpti: data.data.cost_per_thousand_impressions_high_persuasive,
+      value: statsResponse.data.total_impressions_high_persuasive,
+      spend: statsResponse.data.total_spend_high_persuasive,
+      cpti: statsResponse.data.cost_per_thousand_impressions_high_persuasive,
     },
     {
       name: "Low Persuasive",
-      value: data.data.total_impressions_low_persuasive,
-      spend: data.data.total_spend_low_persuasive,
-      cpti: data.data.cost_per_thousand_impressions_low_persuasive,
+      value: statsResponse.data.total_impressions_low_persuasive,
+      spend: statsResponse.data.total_spend_low_persuasive,
+      cpti: statsResponse.data.cost_per_thousand_impressions_low_persuasive,
     },
   ];
 

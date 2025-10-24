@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
-import useSWR from "swr";
+import React, { useState, useMemo } from "react";
 import { useDateContext } from "../context/DateContext";
 import { usePartyContext } from "../context/PartyContext";
 import DateSelector from "./DateSelectorComp";
@@ -9,6 +8,8 @@ import { defaultStartDate, defaultEndDate, parties } from "../lib/config";
 import { formatNumber } from "../lib/util";
 import PartySelectionComponent from "./PartySelectionComponent";
 import { useTheme } from "@/context/ThemeContext";
+import { useStaticData } from "@/context/DataContext";
+import { computeGeneralStats } from "@/lib/staticCalculations";
 
 import {
   Calendar,
@@ -22,24 +23,17 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
-const fetcher = (...args) => fetch(...args).then((res) => res.json());
-
 const Sidebar = () => {
   const { startDate, endDate, updateStartDate, updateEndDate } =
     useDateContext();
   const { selectedParties, updateSelectedParties } = usePartyContext();
   const { isDarkMode } = useTheme();
+  const { data, error, isLoading } = useStaticData();
 
-  const {
-    data: generalStats,
-    error,
-    isLoading,
-  } = useSWR(
-    `${API_URL}/api/general-stats?startDate=${defaultStartDate}&endDate=${defaultEndDate}`,
-    fetcher
-  );
+  const generalStats = useMemo(() => {
+    if (!data) return null;
+    return computeGeneralStats(data, defaultStartDate, defaultEndDate);
+  }, [data]);
 
   return (
     <div

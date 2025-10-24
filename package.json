@@ -3,6 +3,8 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
+      "generate:data": "python3 scripts/generate_static_data.py || python scripts/generate_static_data.py",
+      "prebuild": "npm run generate:data",
       "dev": "next dev",
       "dev:remote": "sst bind next dev",
       "deploy": "sst deploy --stage=prod",

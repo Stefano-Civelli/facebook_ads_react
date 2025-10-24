@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import {
   BarChart,
   Bar,
@@ -11,34 +11,33 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import useSWR from "swr";
 import { useDateContext } from "../../context/DateContext";
 import { chartColors } from "@/lib/config.js";
 import { formatNumber, cleanString } from "@/lib/util";
 import CustomLegend from "@/components/CustomLegendComponent";
 import { useTheme } from "@/context/ThemeContext";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
-const fetcher = (...args) => fetch(...args).then((res) => res.json());
+import { useStaticData } from "@/context/DataContext";
+import { computePartyBreakdown } from "@/lib/staticCalculations";
 
 const BarChartComponent = ({ dataType, title, valuePrefix = "" }) => {
   const { startDate, endDate } = useDateContext();
   const { isDarkMode } = useTheme();
-  const { data, error, isLoading } = useSWR(
-    `${API_URL}/api/party-${dataType}?startDate=${startDate}&endDate=${endDate}`,
-    fetcher
-  );
+  const { data, error, isLoading } = useStaticData();
 
-  if (error) return <div>failed to load</div>;
-  if (isLoading)
+  const breakdown = useMemo(() => {
+    if (!data) return null;
+    return computePartyBreakdown(data, startDate, endDate, dataType);
+  }, [data, startDate, endDate, dataType]);
+
+  if (error) return <div>failed to load dataset</div>;
+  if (isLoading || !breakdown)
     return (
       <div className="h-[300px] flex items-center justify-center">
         <span className="loading loading-spinner loading-lg text-black dark:text-white"></span>
       </div>
     );
 
-  const formattedData = Object.entries(data).map(([party, values]) => ({
+  const formattedData = Object.entries(breakdown).map(([party, values]) => ({
     party: cleanString(party),
     low_persuasive: values[`low_persuasive_${dataType}`],
     high_persuasive: values[`high_persuasive_${dataType}`],

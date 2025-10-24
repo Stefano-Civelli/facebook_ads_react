@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useMemo } from "react";
 import {
   BarChart,
   Bar,
@@ -10,48 +10,52 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import useSWR from "swr";
 import { useDateContext } from "../../context/DateContext";
 import { usePartyContext } from "@/context/PartyContext";
 import { formatNumber } from "@/lib/util";
 import { shortNameParties } from "@/lib/config";
 import { useTheme } from "@/context/ThemeContext";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
-const fetcher = (...args) => fetch(...args).then((res) => res.json());
+import { useStaticData } from "@/context/DataContext";
+import { computeDemographics } from "@/lib/staticCalculations";
 
 const DemographicsBarchartComponent = ({ demographicType }) => {
   const { startDate, endDate } = useDateContext();
   const { selectedParties } = usePartyContext();
   const { isDarkMode } = useTheme();
+  const { data, error, isLoading } = useStaticData();
 
-  const {
-    data: apiResponse,
-    error,
-    isLoading,
-  } = useSWR(
-    `${API_URL}/api/${demographicType}-impressions?startDate=${startDate}&endDate=${endDate}&parties=${selectedParties}`,
-    fetcher
-  );
+  const apiResponse = useMemo(() => {
+    if (!data) return null;
+    return computeDemographics(
+      data,
+      startDate,
+      endDate,
+      selectedParties,
+      demographicType
+    );
+  }, [data, startDate, endDate, selectedParties, demographicType]);
 
-  if (error) return <div>failed to load</div>;
-  if (isLoading)
+  if (error) return <div>failed to load dataset</div>;
+  if (isLoading || !apiResponse)
     return (
       <div className="h-[300px] flex items-center justify-center">
         <span className="loading loading-spinner loading-lg text-black dark:text-white"></span>
       </div>
     );
 
-  const { data, title } = apiResponse;
+  const { data: demographicsData, title } = apiResponse;
 
   const categories = Array.from(
-    new Set(Object.values(data).flatMap((party) => Object.keys(party.total)))
+    new Set(
+      Object.values(demographicsData).flatMap((party) =>
+        Object.keys(party.total)
+      )
+    )
   );
 
   const formattedData = categories.map((category) => {
     const categoryData = { category };
-    Object.entries(data).forEach(([party, values]) => {
+    Object.entries(demographicsData).forEach(([party, values]) => {
       categoryData[`${party}_others`] =
         values.total[category] -
           values.high_persuasive[category] -
@@ -64,7 +68,7 @@ const DemographicsBarchartComponent = ({ demographicType }) => {
 
   const sortedParties = shortNameParties
     .map((party) => party.name)
-    .filter((party) => data.hasOwnProperty(party));
+    .filter((party) => demographicsData.hasOwnProperty(party));
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {

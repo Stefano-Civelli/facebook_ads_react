@@ -1,13 +1,10 @@
 "use client";
 
-import React from "react";
-import useSWR from "swr";
+import React, { useMemo } from "react";
 import { useDateContext } from "@/context/DateContext";
+import { useStaticData } from "@/context/DataContext";
+import { computeGeneralStats } from "@/lib/staticCalculations";
 import { formatNumber, formatPercentage } from "@/lib/util";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
-const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 const StatItem = ({ label, value, subValue }) => (
   <div className="flex flex-col items-center justify-center p-2 text-center h-full">
@@ -29,21 +26,27 @@ const StatItem = ({ label, value, subValue }) => (
 
 const GeneralStatsComponent = () => {
   const { startDate, endDate } = useDateContext();
-  const { data, error, isLoading } = useSWR(
-    `${API_URL}/api/general-stats?startDate=${startDate}&endDate=${endDate}`,
-    fetcher
-  );
+  const { data, error, isLoading } = useStaticData();
+
+  const statsResponse = useMemo(() => {
+    if (!data) return null;
+    return computeGeneralStats(data, startDate, endDate);
+  }, [data, startDate, endDate]);
 
   if (error)
-    return <div className="text-red-600 dark:text-red-400">Failed to load</div>;
-  if (isLoading)
+    return (
+      <div className="text-red-600 dark:text-red-400">
+        Failed to load dataset
+      </div>
+    );
+  if (isLoading || !statsResponse)
     return (
       <div className="h-[300px] flex items-center justify-center">
         <span className="loading loading-spinner loading-lg text-black dark:text-white"></span>
       </div>
     );
 
-  const stats = data.data;
+  const stats = statsResponse.data;
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 h-full -mt-4">

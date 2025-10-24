@@ -1,24 +1,21 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import highchartsMap from "highcharts/modules/map";
-import useSWR from "swr";
 import { useDateContext } from "@/context/DateContext";
 import { usePartyContext } from "@/context/PartyContext";
 import { australianRegions } from "@/lib/config";
 import { formatNumber } from "@/lib/util";
 import { useTheme } from "@/context/ThemeContext";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+import { useStaticData } from "@/context/DataContext";
+import { computeRegionalDistribution } from "@/lib/staticCalculations";
 
 // Initialize highchartsMap
 if (typeof Highcharts === "object") {
   highchartsMap(Highcharts);
 }
-
-const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 const RegionalDistributionComponent = ({
   width = "100%",
@@ -29,11 +26,17 @@ const RegionalDistributionComponent = ({
   const [title, setTitle] = useState("");
   const { selectedParties } = usePartyContext();
   const { isDarkMode } = useTheme();
+  const { data, error, isLoading } = useStaticData();
 
-  const { data, error, isLoading } = useSWR(
-    `${API_URL}/api/spend-and-impressions-by-region?startDate=${startDate}&endDate=${endDate}&parties=${selectedParties}`,
-    fetcher
-  );
+  const regionalData = useMemo(() => {
+    if (!data) return null;
+    return computeRegionalDistribution(
+      data,
+      startDate,
+      endDate,
+      selectedParties
+    );
+  }, [data, startDate, endDate, selectedParties]);
 
   useEffect(() => {
     const fetchMapData = async () => {
@@ -41,28 +44,32 @@ const RegionalDistributionComponent = ({
         "https://code.highcharts.com/mapdata/countries/au/au-all.topo.json"
       ).then((response) => response.json());
 
-      if (data) {
+      if (regionalData) {
         const seriesData = mapData.objects.default.geometries
           .filter((feature) =>
             australianRegions.includes(feature.properties.name)
           )
           .map((feature) => ({
             "hc-key": feature.properties["hc-key"],
-            value: data.data[feature.properties.name]?.mean_impressions || 0,
+            value:
+              regionalData.data[feature.properties.name]?.mean_impressions || 0,
             high_persuasive_impressions:
-              data.data[feature.properties.name]?.high_persuasive_impressions ||
-              0,
+              regionalData.data[feature.properties.name]
+                ?.high_persuasive_impressions || 0,
             low_persuasive_impressions:
-              data.data[feature.properties.name]?.low_persuasive_impressions ||
-              0,
-            mean_spend: data.data[feature.properties.name]?.mean_spend || 0,
+              regionalData.data[feature.properties.name]
+                ?.low_persuasive_impressions || 0,
+            mean_spend:
+              regionalData.data[feature.properties.name]?.mean_spend || 0,
             high_persuasive_spend:
-              data.data[feature.properties.name]?.high_persuasive_spend || 0,
+              regionalData.data[feature.properties.name]?.high_persuasive_spend ||
+              0,
             low_persuasive_spend:
-              data.data[feature.properties.name]?.low_persuasive_spend || 0,
+              regionalData.data[feature.properties.name]?.low_persuasive_spend ||
+              0,
           }));
 
-        setTitle(data.title);
+        setTitle(regionalData.title);
 
         setMapOptions({
           chart: {
@@ -126,21 +133,22 @@ const RegionalDistributionComponent = ({
                   lat: -35.4735,
                   lon: 149.0124,
                   z:
-                    data.data["Australian Capital Territory"]
+                    regionalData.data["Australian Capital Territory"]
                       ?.mean_impressions || 0,
                   high_persuasive_impressions:
-                    data.data["Australian Capital Territory"]
+                    regionalData.data["Australian Capital Territory"]
                       ?.high_persuasive_impressions || 0,
                   low_persuasive_impressions:
-                    data.data["Australian Capital Territory"]
+                    regionalData.data["Australian Capital Territory"]
                       ?.low_persuasive_impressions || 0,
                   mean_spend:
-                    data.data["Australian Capital Territory"]?.mean_spend || 0,
+                    regionalData.data["Australian Capital Territory"]
+                      ?.mean_spend || 0,
                   high_persuasive_spend:
-                    data.data["Australian Capital Territory"]
+                    regionalData.data["Australian Capital Territory"]
                       ?.high_persuasive_spend || 0,
                   low_persuasive_spend:
-                    data.data["Australian Capital Territory"]
+                    regionalData.data["Australian Capital Territory"]
                       ?.low_persuasive_spend || 0,
                 },
               ],
@@ -197,10 +205,10 @@ const RegionalDistributionComponent = ({
       }
     };
     fetchMapData();
-  }, [data, isDarkMode]);
+  }, [regionalData, isDarkMode]);
 
-  if (error) return <div>failed to load</div>;
-  if (isLoading)
+  if (error) return <div>failed to load dataset</div>;
+  if (isLoading || !regionalData)
     return (
       <div className="h-[300px] flex items-center justify-center">
         <span className="loading loading-spinner loading-lg text-black dark:text-white"></span>
